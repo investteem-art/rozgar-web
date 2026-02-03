@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rozgar Seva - Login</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #ffffff; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+
+        /* Loader & Boxes */
+        #loader { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
+        .logo-img { width: 140px; margin-bottom: 30px; animation: pulseLogo 2s infinite ease-in-out; }
+        .progress-container { width: 200px; height: 4px; background: #e0e0e0; border-radius: 10px; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background: #1a73e8; animation: loadProgress 2s forwards; }
+
+        @keyframes pulseLogo { 0%, 100% { transform: scale(0.95); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
+        @keyframes loadProgress { 0% { width: 0%; } 100% { width: 100%; } }
+
+        #login-box, #otp-box, #name-box { display: none; width: 90%; max-width: 400px; background: white; padding: 40px 25px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); text-align: center; }
+
+        h2 { color: #1a73e8; font-size: 26px; margin-bottom: 10px; }
+        p { color: #5f6368; margin-bottom: 25px; font-size: 14px; }
+        
+        .input-field { width: 100%; padding: 16px; border: 2px solid #f1f3f4; border-radius: 15px; margin-bottom: 20px; outline: none; font-size: 18px; text-align: center; background: #f8f9fa; transition: 0.3s; }
+        .input-field:focus { border-color: #1a73e8; background: #fff; }
+
+        .btn-main { width: 100%; padding: 16px; background: #1a73e8; color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 18px; box-shadow: 0 8px 15px rgba(26,115,232,0.2); }
+
+        #ad-bottom { position: fixed; bottom: 0; width: 100%; height: 60px; background: #fff; border-top: 1px solid #eee; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #aaa; }
+    </style>
+</head>
+<body>
+
+<div id="loader">
+    <img src="https://cdn-icons-png.flaticon.com/512/1063/1063376.png" class="logo-img">
+    <div class="progress-container"><div class="progress-bar"></div></div>
+    <p style="margin-top: 15px; color: #5f6368;">Starting Rozgar Seva...</p>
+</div>
+
+<div id="login-box">
+    <h2>Login</h2>
+    <p>Enter your 10-digit mobile number</p>
+    <input type="tel" id="phoneNumber" class="input-field" placeholder="98765 43210">
+    <div id="recaptcha-container"></div>
+    <button class="btn-main" onclick="sendOTP()">Send OTP</button>
+</div>
+
+<div id="otp-box">
+    <h2>Verify OTP</h2>
+    <p>We sent a code to your phone</p>
+    <input type="number" id="otpInput" class="input-field" placeholder="------">
+    <button class="btn-main" onclick="verifyOTP()">Verify & Login</button>
+</div>
+
+<div id="name-box">
+    <h2>Welcome!</h2>
+    <p>Aapka naam kya hai?</p>
+    <input type="text" id="userName" class="input-field" placeholder="Enter Full Name">
+    <button class="btn-main" onclick="saveName()">Start Using App</button>
+</div>
+
+<div id="ad-bottom">ADVERTISEMENT | Unit ID: ca-app-pub-1813290992131734/6960451861</div>
+
+<script>
+    const firebaseConfig = { 
+        apiKey: "AIzaSyAZ7w5xlM6NWrbbPxjVhYkLmLTMTvy0Rlk",
+        authDomain: "rozgar-cab18.firebaseapp.com",
+        databaseURL: "https://rozgar-cab18-default-rtdb.firebaseio.com",
+        projectId: "rozgar-cab18",
+        storageBucket: "rozgar-cab18.firebasestorage.app",
+        messagingSenderId: "601958420251",
+        appId: "1:601958420251:web:85e39016d9b5e4d22d0dbe"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    let confirmationResult;
+
+    firebase.auth().onAuthStateChanged((user) => {
+        setTimeout(() => { 
+            if (user) {
+                // Check if user exists in database
+                db.ref('users/' + user.uid).once('value', snap => {
+                    if(snap.exists() && snap.val().name) {
+                        window.location.href = "home.html";
+                    } else {
+                        document.getElementById("loader").style.display = "none";
+                        document.getElementById("name-box").style.display = "block";
+                    }
+                });
+            } else {
+                document.getElementById("loader").style.display = "none";
+                document.getElementById("login-box").style.display = "block";
+            }
+        }, 2000); 
+    });
+
+    function sendOTP() {
+        const num = document.getElementById('phoneNumber').value;
+        const verifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 'size': 'invisible' });
+        firebase.auth().signInWithPhoneNumber("+91" + num, verifier)
+            .then(res => {
+                confirmationResult = res;
+                document.getElementById("login-box").style.display = "none";
+                document.getElementById("otp-box").style.display = "block";
+            }).catch(err => { alert(err.message); location.reload(); });
+    }
+
+    function verifyOTP() {
+        const code = document.getElementById("otpInput").value;
+        confirmationResult.confirm(code).then(result => {
+            const user = result.user;
+            // Check if New or Old
+            db.ref('users/' + user.uid).once('value', snap => {
+                if(snap.exists() && snap.val().name) {
+                    window.location.href = "home.html";
+                } else {
+                    document.getElementById("otp-box").style.display = "none";
+                    document.getElementById("name-box").style.display = "block";
+                }
+            });
+        }).catch(err => { alert("Invalid OTP!"); });
+    }
+
+    function saveName() {
+        const name = document.getElementById("userName").value;
+        const user = firebase.auth().currentUser;
+        if(!name) return alert("Please enter your name");
+
+        // Save new user data
+        db.ref('users/' + user.uid).set({
+            name: name,
+            phone: user.phoneNumber,
+            uid: user.uid,
+            publicStatus: true,
+            joinedAt: Date.now()
+        }).then(() => {
+            window.location.href = "home.html";
+        });
+    }
+</script>
+</body>
+</html>
