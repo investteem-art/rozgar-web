@@ -3,145 +3,349 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rozgar Seva - Login</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
+    <title>RozgarSathi - Login</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #ffffff; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-
-        /* Loader & Boxes */
-        #loader { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
-        .logo-img { width: 140px; margin-bottom: 30px; animation: pulseLogo 2s infinite ease-in-out; }
-        .progress-container { width: 200px; height: 4px; background: #e0e0e0; border-radius: 10px; overflow: hidden; }
-        .progress-bar { width: 0%; height: 100%; background: #1a73e8; animation: loadProgress 2s forwards; }
-
-        @keyframes pulseLogo { 0%, 100% { transform: scale(0.95); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
-        @keyframes loadProgress { 0% { width: 0%; } 100% { width: 100%; } }
-
-        #login-box, #otp-box, #name-box { display: none; width: 90%; max-width: 400px; background: white; padding: 40px 25px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); text-align: center; }
-
-        h2 { color: #1a73e8; font-size: 26px; margin-bottom: 10px; }
-        p { color: #5f6368; margin-bottom: 25px; font-size: 14px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
         
-        .input-field { width: 100%; padding: 16px; border: 2px solid #f1f3f4; border-radius: 15px; margin-bottom: 20px; outline: none; font-size: 18px; text-align: center; background: #f8f9fa; transition: 0.3s; }
-        .input-field:focus { border-color: #1a73e8; background: #fff; }
+        .loading-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; color: white;
+        }
+        .spinner { 
+            width: 60px; height: 60px; border: 6px solid rgba(255,255,255,0.3); 
+            border-top: 6px solid white; border-radius: 50%; animation: spin 1s linear infinite; 
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-text { margin-top: 20px; font-size: 18px; font-weight: 500; }
 
-        .btn-main { width: 100%; padding: 16px; background: #1a73e8; color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 18px; box-shadow: 0 8px 15px rgba(26,115,232,0.2); }
+        .container { 
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); 
+            padding: 40px; border-radius: 25px; box-shadow: 0 25px 50px rgba(0,0,0,0.15); 
+            width: 95%; max-width: 420px; position: relative; 
+        }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { color: #2563eb; font-size: 32px; margin-bottom: 10px; }
+        .logo p { color: #6b7280; font-size: 16px; }
 
-        #ad-bottom { position: fixed; bottom: 0; width: 100%; height: 60px; background: #fff; border-top: 1px solid #eee; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #aaa; }
+        .phone-container { 
+            display: flex; align-items: center; margin-bottom: 25px; background: #f8fafc; 
+            padding: 18px; border-radius: 15px; border: 2px solid #e2e8f0; transition: all 0.3s;
+        }
+        .phone-container:focus-within { border-color: #4facfe; box-shadow: 0 0 0 3px rgba(79,172,254,0.1); }
+        .country-code { 
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; 
+            padding: 12px 18px; font-weight: 700; border-radius: 12px; margin-right: 15px; 
+            min-width: 70px; text-align: center; font-size: 18px;
+        }
+        #phoneNumber { 
+            flex: 1; border: none; background: transparent; font-size: 20px; outline: none; 
+            padding: 12px 0; color: #1e293b;
+        }
+        #phoneNumber::placeholder { color: #94a3b8; }
+
+        .otp-container { margin: 25px 0; position: relative; }
+        #otpInput { 
+            width: 100%; height: 65px; font-size: 28px; text-align: center; 
+            letter-spacing: 25px; border: 3px solid #e2e8f0; border-radius: 18px; 
+            font-weight: 700; outline: none; background: #f8fafc; transition: all 0.3s;
+        }
+        #otpInput:focus { 
+            border-color: #4facfe; box-shadow: 0 0 20px rgba(79,172,254,0.3); 
+            background: white;
+        }
+
+        .btn { 
+            width: 100%; padding: 18px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+            color: white; border: none; border-radius: 15px; font-size: 18px; font-weight: 700; 
+            cursor: pointer; transition: all 0.3s; margin: 15px 0; position: relative; overflow: hidden;
+        }
+        .btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(79,172,254,0.4); }
+        .btn:disabled { 
+            opacity: 0.7; cursor: not-allowed; transform: none; background: #94a3b8;
+        }
+        .btn.loading::after {
+            content: ''; position: absolute; width: 20px; height: 20px; 
+            top: 50%; left: 50%; margin-left: -10px; margin-top: -10px;
+            border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; 
+            border-radius: 50%; animation: spin 1s linear infinite;
+        }
+
+        .name-input input { 
+            width: 100%; padding: 18px; border: 3px solid #e2e8f0; border-radius: 15px; 
+            font-size: 18px; margin: 25px 0; background: #f8fafc; transition: all 0.3s;
+        }
+        .name-input input:focus { border-color: #4facfe; box-shadow: 0 0 20px rgba(79,172,254,0.3); background: white; }
+
+        .hidden { display: none !important; }
+        .welcome-new { text-align: center; color: #64748b; margin-bottom: 25px; font-size: 16px; }
+        .phone-display { 
+            text-align: center; margin-bottom: 25px; font-size: 17px; color: #1e293b; 
+            font-weight: 500; background: #f1f5f9; padding: 12px; border-radius: 12px;
+        }
+        #recaptcha-container { margin: 20px 0; text-align: center; }
+        
+        .status { text-align: center; margin: 15px 0; padding: 12px; border-radius: 10px; font-weight: 500; }
+        .status.success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .status.error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
     </style>
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="spinner"></div>
+        <p class="loading-text">Welcome to RozgarSathi</p>
+        <p style="font-size: 14px; margin-top: 10px; opacity: 0.9;">Loading your job portal...</p>
+    </div>
 
-<div id="loader">
-    <img src="https://cdn-icons-png.flaticon.com/512/1063/1063376.png" class="logo-img">
-    <div class="progress-container"><div class="progress-bar"></div></div>
-    <p style="margin-top: 15px; color: #5f6368;">Starting Rozgar Seva...</p>
-</div>
+    <div class="container">
+        <div class="logo">
+            <h1>🚀 RozgarSathi</h1>
+            <p>Find Your Dream Job</p>
+        </div>
 
-<div id="login-box">
-    <h2>Login</h2>
-    <p>Enter your 10-digit mobile number</p>
-    <input type="tel" id="phoneNumber" class="input-field" placeholder="98765 43210">
-    <div id="recaptcha-container"></div>
-    <button class="btn-main" onclick="sendOTP()">Send OTP</button>
-</div>
+        <!-- Phone Number Screen -->
+        <div id="phoneScreen">
+            <div class="phone-container">
+                <div class="country-code">🇮🇳 +91</div>
+                <input type="tel" id="phoneNumber" placeholder="Enter 10-digit mobile number" maxlength="10">
+            </div>
+            <button class="btn" id="sendOtpBtn">Send OTP</button>
+            <div id="recaptcha-container"></div>
+        </div>
 
-<div id="otp-box">
-    <h2>Verify OTP</h2>
-    <p>We sent a code to your phone</p>
-    <input type="number" id="otpInput" class="input-field" placeholder="------">
-    <button class="btn-main" onclick="verifyOTP()">Verify & Login</button>
-</div>
+        <!-- OTP Screen -->
+        <div id="otpScreen" class="hidden">
+            <p class="phone-display" id="phoneDisplay">OTP sent to your number</p>
+            <div class="otp-container">
+                <input type="text" id="otpInput" maxlength="6" placeholder="Enter 6-digit OTP">
+            </div>
+            <button class="btn" id="verifyOtpBtn">Verify & Continue</button>
+            <div id="statusMsg"></div>
+        </div>
 
-<div id="name-box">
-    <h2>Welcome!</h2>
-    <p>Aapka naam kya hai?</p>
-    <input type="text" id="userName" class="input-field" placeholder="Enter Full Name">
-    <button class="btn-main" onclick="saveName()">Start Using App</button>
-</div>
+        <!-- Name Screen for New Users -->
+        <div id="nameScreen" class="hidden">
+            <p class="welcome-new">🎉 Welcome to RozgarSathi!</p>
+            <p style="text-align: center; color: #64748b; margin-bottom: 25px;">Please tell us your name</p>
+            <div class="name-input">
+                <input type="text" id="userName" placeholder="Enter your full name">
+            </div>
+            <button class="btn" id="saveNameBtn">Continue to Jobs</button>
+        </div>
+    </div>
 
-<div id="ad-bottom">ADVERTISEMENT | Unit ID: ca-app-pub-1813290992131734/6960451861</div>
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQaAXGwPClpui0jxUrIPb5qok-pCAG--4",
+            authDomain: "rozgar-sathi-1ae88.firebaseapp.com",
+            databaseURL: "https://rozgar-sathi-1ae88-default-rtdb.firebaseio.com",
+            projectId: "rozgar-sathi-1ae88",
+            storageBucket: "rozgar-sathi-1ae88.firebasestorage.app",
+            messagingSenderId: "78331447702",
+            appId: "1:78331447702:web:5d932141d7a369091635b7"
+        };
 
-<script>
-    const firebaseConfig = { 
-        apiKey: "AIzaSyAZ7w5xlM6NWrbbPxjVhYkLmLTMTvy0Rlk",
-        authDomain: "rozgar-cab18.firebaseapp.com",
-        databaseURL: "https://rozgar-cab18-default-rtdb.firebaseio.com",
-        projectId: "rozgar-cab18",
-        storageBucket: "rozgar-cab18.firebasestorage.app",
-        messagingSenderId: "601958420251",
-        appId: "1:601958420251:web:85e39016d9b5e4d22d0dbe"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    let confirmationResult;
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
 
-    firebase.auth().onAuthStateChanged((user) => {
-        setTimeout(() => { 
-            if (user) {
-                // Check if user exists in database
-                db.ref('users/' + user.uid).once('value', snap => {
-                    if(snap.exists() && snap.val().name) {
-                        window.location.href = "home.html";
-                    } else {
-                        document.getElementById("loader").style.display = "none";
-                        document.getElementById("name-box").style.display = "block";
-                    }
-                });
-            } else {
-                document.getElementById("loader").style.display = "none";
-                document.getElementById("login-box").style.display = "block";
-            }
-        }, 2000); 
-    });
+        let confirmationResult;
+        let currentPhone = '';
 
-    function sendOTP() {
-        const num = document.getElementById('phoneNumber').value;
-        const verifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 'size': 'invisible' });
-        firebase.auth().signInWithPhoneNumber("+91" + num, verifier)
-            .then(res => {
-                confirmationResult = res;
-                document.getElementById("login-box").style.display = "none";
-                document.getElementById("otp-box").style.display = "block";
-            }).catch(err => { alert(err.message); location.reload(); });
-    }
+        // Elements
+        const phoneScreen = document.getElementById('phoneScreen');
+        const otpScreen = document.getElementById('otpScreen');
+        const nameScreen = document.getElementById('nameScreen');
+        const phoneNumber = document.getElementById('phoneNumber');
+        const otpInput = document.getElementById('otpInput');
+        const userName = document.getElementById('userName');
+        const statusMsg = document.getElementById('statusMsg');
 
-    function verifyOTP() {
-        const code = document.getElementById("otpInput").value;
-        confirmationResult.confirm(code).then(result => {
-            const user = result.user;
-            // Check if New or Old
-            db.ref('users/' + user.uid).once('value', snap => {
-                if(snap.exists() && snap.val().name) {
-                    window.location.href = "home.html";
-                } else {
-                    document.getElementById("otp-box").style.display = "none";
-                    document.getElementById("name-box").style.display = "block";
-                }
-            });
-        }).catch(err => { alert("Invalid OTP!"); });
-    }
+        // Hide loading screen
+        setTimeout(() => {
+            document.getElementById('loadingScreen').style.display = 'none';
+        }, 2500);
 
-    function saveName() {
-        const name = document.getElementById("userName").value;
-        const user = firebase.auth().currentUser;
-        if(!name) return alert("Please enter your name");
-
-        // Save new user data
-        db.ref('users/' + user.uid).set({
-            name: name,
-            phone: user.phoneNumber,
-            uid: user.uid,
-            publicStatus: true,
-            joinedAt: Date.now()
-        }).then(() => {
-            window.location.href = "home.html";
+        // Input formatting
+        phoneNumber.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
         });
-    }
-</script>
+
+        otpInput.addEventListener('input', function() {
+            let value = this.value.replace(/[^0-9]/g, '');
+            if (value.length > 6) value = value.slice(0, 6);
+            this.value = value;
+        });
+
+        // Initialize reCAPTCHA
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+            size: 'invisible',
+            callback: () => { console.log('reCAPTCHA verified'); }
+        });
+
+        // Send OTP
+        document.getElementById('sendOtpBtn').addEventListener('click', async () => {
+            const phone = phoneNumber.value.trim();
+            
+            if (phone.length !== 10) {
+                showStatus('Please enter valid 10-digit number', 'error');
+                return;
+            }
+
+            const sendBtn = document.getElementById('sendOtpBtn');
+            sendBtn.disabled = true;
+            sendBtn.classList.add('loading');
+            sendBtn.textContent = 'Sending...';
+
+            currentPhone = '+91' + phone;
+
+            try {
+                confirmationResult = await auth.signInWithPhoneNumber(currentPhone, window.recaptchaVerifier);
+                document.getElementById('phoneDisplay').textContent = `OTP sent to ${currentPhone}`;
+                
+                phoneScreen.classList.add('hidden');
+                otpScreen.classList.remove('hidden');
+                otpInput.focus();
+                
+            } catch (error) {
+                showStatus('Failed to send OTP: ' + error.message, 'error');
+                console.error('OTP Error:', error);
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.classList.remove('loading');
+                sendBtn.textContent = 'Send OTP';
+            }
+        });
+
+        // Verify OTP
+        document.getElementById('verifyOtpBtn').addEventListener('click', async () => {
+            const otp = otpInput.value.trim();
+            
+            if (otp.length !== 6) {
+                showStatus('Please enter 6-digit OTP', 'error');
+                return;
+            }
+
+            const verifyBtn = document.getElementById('verifyOtpBtn');
+            verifyBtn.disabled = true;
+            verifyBtn.classList.add('loading');
+            verifyBtn.textContent = 'Verifying...';
+
+            try {
+                const result = await confirmationResult.confirm(otp);
+                const user = result.user;
+                
+                // Check user profile
+                await checkUserProfile(user);
+                
+            } catch (error) {
+                showStatus('Invalid OTP. Try again.', 'error');
+                otpInput.value = '';
+                otpInput.focus();
+                console.error('Verify Error:', error);
+            } finally {
+                verifyBtn.disabled = false;
+                verifyBtn.classList.remove('loading');
+                verifyBtn.textContent = 'Verify & Continue';
+            }
+        });
+
+        async function checkUserProfile(user) {
+            try {
+                const userRef = db.ref(`users/${user.phoneNumber}`);
+                const snapshot = await userRef.once('value');
+                
+                if (snapshot.exists()) {
+                    // Existing user - direct login
+                    saveLoginAndRedirect();
+                } else {
+                    // New user
+                    otpScreen.classList.add('hidden');
+                    nameScreen.classList.remove('hidden');
+                    userName.focus();
+                }
+            } catch (error) {
+                console.error('Profile check error:', error);
+                saveLoginAndRedirect(); // Fallback
+            }
+        }
+
+        // Save new user
+        document.getElementById('saveNameBtn').addEventListener('click', async () => {
+            const name = userName.value.trim();
+            
+            if (!name || name.length < 2) {
+                showStatus('Please enter valid name (2+ characters)', 'error');
+                return;
+            }
+
+            const saveBtn = document.getElementById('saveNameBtn');
+            saveBtn.disabled = true;
+            saveBtn.classList.add('loading');
+            saveBtn.textContent = 'Saving...';
+
+            try {
+                const user = auth.currentUser;
+                await db.ref(`users/${user.phoneNumber}`).set({
+                    name: name,
+                    phone: user.phoneNumber,
+                    uid: user.uid,
+                    createdAt: Date.now(),
+                    isActive: true
+                });
+                
+                saveLoginAndRedirect();
+                
+            } catch (error) {
+                showStatus('Failed to save profile', 'error');
+                console.error('Save error:', error);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.classList.remove('loading');
+                saveBtn.textContent = 'Continue to Jobs';
+            }
+        });
+
+        function saveLoginAndRedirect() {
+            localStorage.setItem('rozgarSathiLoggedIn', 'true');
+            localStorage.setItem('rozgarSathiUser', auth.currentUser.phoneNumber);
+            window.location.href = 'home.html';
+        }
+
+        function showStatus(message, type) {
+            statusMsg.textContent = message;
+            statusMsg.className = `status ${type}`;
+            setTimeout(() => {
+                statusMsg.textContent = '';
+                statusMsg.className = 'status';
+            }, 4000);
+        }
+
+        // Auto-redirect if logged in
+        auth.onAuthStateChanged((user) => {
+            if (user && localStorage.getItem('rozgarSathiLoggedIn') === 'true') {
+                window.location.href = 'home.html';
+            }
+        });
+
+        // Enter key support
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (!phoneScreen.classList.contains('hidden')) {
+                    document.getElementById('sendOtpBtn').click();
+                } else if (!otpScreen.classList.contains('hidden')) {
+                    document.getElementById('verifyOtpBtn').click();
+                } else if (!nameScreen.classList.contains('hidden')) {
+                    document.getElementById('saveNameBtn').click();
+                }
+            }
+        });
+    </script>
 </body>
 </html>

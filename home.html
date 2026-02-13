@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RozgarSathi - Home</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1813290992131734" crossorigin="anonymous"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f4f7f6; padding-top: 70px; }
+
+        /* Top Navigation */
+        .top-nav { 
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+            padding: 12px 15px; position: fixed; top: 0; width: 100%; z-index: 1000; 
+            display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%;
+        }
+        .nav-left, .nav-right { display: flex; align-items: center; gap: 12px; color: white; }
+        
+        /* Profile Photo / Icon */
+        .profile-btn { 
+            width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,0.3); 
+            border: 2px solid white; color: white; cursor: pointer; display: flex; 
+            align-items: center; justify-content: center; overflow: hidden; font-size: 20px;
+        }
+        .profile-btn img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .brand-name { font-weight: bold; font-size: 18px; }
+        .nav-icon { font-size: 22px; cursor: pointer; color: white; text-decoration: none; }
+
+        /* Filters */
+        .filters { background: white; padding: 15px; margin: 10px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .tab-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+        .tab-btn { padding: 10px 20px; border: 1px solid #e2e8f0; background: white; border-radius: 25px; cursor: pointer; font-weight: 600; font-size: 14px; white-space: nowrap; }
+        .tab-btn.active { background: #4facfe; color: white; border-color: #4facfe; }
+
+        /* Ads */
+        #interstitialAd { display: none; margin: 10px; text-align: center; }
+
+        /* Cards */
+        .grid { padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; }
+        .card { background: white; border-radius: 20px; padding: 15px; border-left: 6px solid #10b981; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .card.owner { border-left-color: #f59e0b; }
+        
+        .card-head { display: flex; gap: 12px; margin-bottom: 10px; }
+        .icon-box { width: 45px; height: 45px; background: #f0fdfa; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .badge { font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 5px; text-transform: uppercase; }
+        .badge-worker { background: #d1fae5; color: #065f46; }
+        .badge-owner { background: #fef3c7; color: #92400e; }
+
+        .actions { display: flex; gap: 8px; margin-top: 15px; }
+        .btn { flex: 1; padding: 10px; border-radius: 10px; color: white; font-weight: bold; text-align: center; text-decoration: none; font-size: 13px; }
+        .btn-call { background: #10b981; }
+        .btn-msg { background: #3b82f6; }
+        .btn-map { background: #f59e0b; }
+    </style>
+</head>
+<body>
+
+    <div class="top-nav">
+        <div class="nav-left">
+            <div class="profile-btn" id="profileIcon">👤</div>
+            <span class="brand-name">RozgarSathi</span>
+            <a href="find.html" class="nav-icon">🔍</a>
+        </div>
+        <div class="nav-right">
+            <a href="line.html" class="nav-icon">☰</a>
+        </div>
+    </div>
+
+    <input type="file" id="photoInput" accept="image/*" style="display: none;">
+
+    <div id="interstitialAd">
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1813290992131734" data-ad-slot="7709399088" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <div class="filters">
+        <div class="tab-row" id="roleTabs">
+            <button class="tab-btn active" data-role="all">All</button>
+            <button class="tab-btn" data-role="owner">Owners</button>
+            <button class="tab-btn" data-role="worker">Workers</button>
+        </div>
+        <div class="tab-row" id="catTabs" style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+            <button class="tab-btn active" data-cat="all">All Categories</button>
+            <button class="tab-btn" data-cat="plumber">Plumber</button>
+            <button class="tab-btn" data-cat="mistry">Mistry</button>
+            <button class="tab-btn" data-cat="electrician">Electrician</button>
+            <button class="tab-btn" data-cat="driver">Driver</button>
+            <button class="tab-btn" data-cat="helper">Helper</button>
+            <button class="tab-btn" data-cat="painter">Painter</button>
+            <button class="tab-btn" data-cat="other">Other</button>
+        </div>
+    </div>
+
+    <div class="grid" id="workersGrid"></div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQaAXGwPClpui0jxUrIPb5qok-pCAG--4",
+            authDomain: "rozgar-sathi-1ae88.firebaseapp.com",
+            databaseURL: "https://rozgar-sathi-1ae88-default-rtdb.firebaseio.com",
+            projectId: "rozgar-sathi-1ae88",
+            appId: "1:78331447702:web:5d932141d7a369091635b7"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        
+        let allEntries = [];
+        let activeRole = 'all';
+        let activeCat = 'all';
+
+        // --- Profile Icon Logic ---
+        const profileBtn = document.getElementById('profileIcon');
+        const photoInput = document.getElementById('photoInput');
+        let pressTimer;
+
+        // Click to go to profile
+        profileBtn.onclick = () => { location.href = 'profile.html'; };
+
+        // Long Press to Change Photo
+        profileBtn.onmousedown = startPress;
+        profileBtn.ontouchstart = startPress;
+        profileBtn.onmouseup = cancelPress;
+        profileBtn.ontouchend = cancelPress;
+
+        function startPress() { pressTimer = setTimeout(() => photoInput.click(), 800); }
+        function cancelPress() { clearTimeout(pressTimer); }
+
+        photoInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    profileBtn.innerHTML = `<img src="${event.target.result}">`;
+                    localStorage.setItem('userPhoto', event.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        // Load saved photo
+        window.onload = () => {
+            const savedPhoto = localStorage.getItem('userPhoto');
+            if(savedPhoto) profileBtn.innerHTML = `<img src="${savedPhoto}">`;
+        };
+
+        // --- Ad Trigger ---
+        function triggerAd() {
+            const adDiv = document.getElementById('interstitialAd');
+            adDiv.style.display = 'block';
+            setTimeout(() => { adDiv.style.display = 'none'; }, 3000);
+        }
+
+        // --- Data Logic ---
+        function fetchData() {
+            db.ref('jobApplications').on('value', (snap) => {
+                allEntries = [];
+                snap.forEach(child => { allEntries.push({ id: child.key, ...child.val() }); });
+                allEntries.sort((a, b) => b.timestamp - a.timestamp);
+                render();
+            });
+        }
+
+        function render() {
+            const grid = document.getElementById('workersGrid');
+            const filtered = allEntries.filter(item => {
+                // FIXED: 'all' role shows both owner/worker, 'all' cat shows all categories
+                const roleMatch = (activeRole === 'all' || item.applicantType === activeRole);
+                const catMatch = (activeCat === 'all' || item.mainCategory === activeCat);
+                return roleMatch && catMatch;
+            });
+
+            grid.innerHTML = filtered.map(item => `
+                <div class="card ${item.applicantType}">
+                    <div class="card-head">
+                        <div class="icon-box">${getIcon(item.mainCategory)}</div>
+                        <div>
+                            <h3>${item.mainCategory === 'other' ? item.otherWorkName : item.mainCategory}</h3>
+                            <span class="badge ${item.applicantType === 'owner' ? 'badge-owner' : 'badge-worker'}">
+                                ${item.applicantType}
+                            </span>
+                        </div>
+                    </div>
+                    <div style="font-size:13px; color:#475569;">
+                        📍 ${item.workAddress}<br>
+                        👥 Workers: ${item.workersCount} | <b style="color:#10b981;">₹${item.dailyRate}</b>
+                    </div>
+                    <div class="actions">
+                        <a href="tel:${item.userPhone}" class="btn btn-call">Call</a>
+                        <a href="sms:${item.userPhone}" class="btn btn-msg">SMS</a>
+                        <button class="btn btn-map" onclick="window.open('http://googleusercontent.com/maps.google.com/5{encodeURIComponent(item.workAddress)}')">Map</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getIcon(cat) {
+            const icons = { plumber:'🚿', mistry:'👷', electrician:'⚡', driver:'🚗', helper:'🤝', painter:'🎨', other:'💼' };
+            return icons[cat] || '🛠️';
+        }
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.onclick = () => {
+                const parent = btn.parentElement.id;
+                document.querySelectorAll(`#${parent} .tab-btn`).forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                if(parent === 'roleTabs') activeRole = btn.dataset.role;
+                else activeCat = btn.dataset.cat;
+                
+                triggerAd();
+                render();
+            };
+        });
+
+        firebase.auth().onAuthStateChanged(user => { if(user) fetchData(); else location.href='index.html'; });
+    </script>
+</body>
+</html>

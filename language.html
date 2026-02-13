@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RozgarSathi - Select Language</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #f8fafc; color: #334155; }
+
+        /* Header */
+        .header { 
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+            padding: 30px 20px; color: white; border-radius: 0 0 30px 30px;
+            display: flex; align-items: center; gap: 15px;
+        }
+        .back-btn { font-size: 24px; color: white; text-decoration: none; cursor: pointer; }
+
+        .container { padding: 20px; max-width: 500px; margin: 0 auto; }
+        .instruction { margin: 10px 0 20px 10px; font-size: 14px; color: #64748b; font-weight: 500; }
+
+        /* Language Grid */
+        .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        .lang-card { 
+            background: white; border-radius: 20px; padding: 20px; text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05); cursor: pointer;
+            border: 2px solid transparent; transition: 0.3s;
+        }
+        .lang-card:active { transform: scale(0.95); }
+        .lang-card.active { border-color: #4facfe; background: #f0f9ff; }
+
+        .lang-main { display: block; font-size: 18px; font-weight: 700; color: #1e293b; }
+        .lang-sub { display: block; font-size: 12px; color: #94a3b8; margin-top: 5px; }
+
+        /* Confirm Button */
+        .confirm-btn { 
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            width: 80%; max-width: 400px; padding: 15px; border: none;
+            border-radius: 15px; background: #10b981; color: white;
+            font-size: 16px; font-weight: 700; cursor: pointer;
+            box-shadow: 0 10px 20px rgba(16,185,129,0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="line.html" class="back-btn">←</a>
+        <div>
+            <h2 style="font-weight: 700;">Language</h2>
+            <p style="font-size: 13px; opacity: 0.9;">Choose your preferred language</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <p class="instruction">अपनी भाषा चुनें / Select your language</p>
+
+        <div class="lang-grid" id="languageGrid">
+            <div class="lang-card" onclick="selectLang(this, 'en')">
+                <span class="lang-main">English</span>
+                <span class="lang-sub">English</span>
+            </div>
+            <div class="lang-card" onclick="selectLang(this, 'hi')">
+                <span class="lang-main">हिन्दी</span>
+                <span class="lang-sub">Hindi</span>
+            </div>
+            <div class="lang-card" onclick="selectLang(this, 'pa')">
+                <span class="lang-main">ਪੰਜਾਬੀ</span>
+                <span class="lang-sub">Punjabi</span>
+            </div>
+            <div class="lang-card" onclick="selectLang(this, 'bn')">
+                <span class="lang-main">বাংলা</span>
+                <span class="lang-sub">Bengali</span>
+            </div>
+            <div class="lang-card" onclick="selectLang(this, 'mr')">
+                <span class="lang-main">मराठी</span>
+                <span class="lang-sub">Marathi</span>
+            </div>
+            <div class="lang-card" onclick="selectLang(this, 'te')">
+                <span class="lang-main">తెలుగు</span>
+                <span class="lang-sub">Telugu</span>
+            </div>
+            <div class="lang-card" onclick="selectLang(this, 'ta')">
+                <span class="lang-main">தமிழ்</span>
+                <span class="lang-sub">Tamil</span>
+            </div>
+            <div class="lang-card" onclick="selectLang(this, 'gu')">
+                <span class="lang-main">ગુજરાતી</span>
+                <span class="lang-sub">Gujarati</span>
+            </div>
+        </div>
+
+        <button class="confirm-btn" onclick="saveLanguage()">Confirm Language</button>
+    </div>
+
+    <script>
+        let selectedLangCode = localStorage.getItem('appLang') || 'en';
+
+        // पन्ने के लोड होते ही सेव की हुई भाषा को हाईलाइट करना
+        window.onload = () => {
+            const cards = document.querySelectorAll('.lang-card');
+            cards.forEach(card => {
+                const code = card.getAttribute('onclick').match(/'([^']+)'/g)[1].replace(/'/g, "");
+                if (code === selectedLangCode) {
+                    card.classList.add('active');
+                }
+            });
+        };
+
+        function selectLang(element, code) {
+            // पुराने Active क्लास को हटाना
+            const cards = document.querySelectorAll('.lang-card');
+            cards.forEach(card => card.classList.remove('active'));
+            
+            // नए कार्ड को Active करना
+            element.classList.add('active');
+            selectedLangCode = code;
+        }
+
+        function saveLanguage() {
+            localStorage.setItem('appLang', selectedLangCode);
+            alert("Language updated successfully!");
+            window.location.href = 'home.html';
+        }
+    </script>
+</body>
+</html>

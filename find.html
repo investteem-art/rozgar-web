@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RozgarSathi - Search</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f0f4f8; padding-top: 70px; }
+
+        /* Top Bar */
+        .top-nav { 
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+            padding: 15px; position: fixed; top: 0; width: 100%; z-index: 1000; 
+            display: flex; align-items: center; color: white; gap: 15px;
+        }
+        .back-btn { font-size: 24px; cursor: pointer; text-decoration: none; color: white; }
+
+        .container { padding: 15px; max-width: 500px; margin: 0 auto; }
+        
+        /* Search Form */
+        .search-card { 
+            background: white; padding: 20px; border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 20px;
+        }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #475569; font-size: 14px; }
+        .form-group select, .form-group input { 
+            width: 100%; padding: 12px; border: 1px solid #e2e8f0; 
+            border-radius: 12px; font-size: 15px; outline: none; background: #f8fafc;
+        }
+        .row { display: flex; gap: 10px; }
+        .row .form-group { flex: 1; }
+
+        .find-btn { 
+            width: 100%; padding: 15px; border: none; border-radius: 15px; 
+            background: #10b981; color: white; font-weight: 700; font-size: 16px; 
+            cursor: pointer; transition: 0.3s;
+        }
+        .find-btn:hover { background: #059669; }
+
+        /* Result Cards */
+        .result-card { 
+            background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; 
+            border-left: 5px solid #4facfe; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .result-card.owner { border-left-color: #f59e0b; }
+        .card-price { color: #10b981; font-weight: 800; }
+        .distance-tag { font-size: 11px; background: #f1f5f9; padding: 2px 6px; border-radius: 5px; color: #64748b; float: right; }
+        
+        .no-data { text-align: center; padding: 40px; color: #94a3b8; }
+    </style>
+</head>
+<body>
+
+    <div class="top-nav">
+        <a href="home.html" class="back-btn">←</a>
+        <h3 style="flex-grow: 1;">Find Work / Worker</h3>
+    </div>
+
+    <div class="container">
+        <div class="search-card">
+            <div class="form-group">
+                <label>I am looking for</label>
+                <select id="role">
+                    <option value="all">Everyone</option>
+                    <option value="owner">Owner / Contractor</option>
+                    <option value="worker">Worker</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Category</label>
+                <select id="category">
+                    <option value="all">All Categories</option>
+                    <option value="plumber">Plumber</option>
+                    <option value="mistry">Mistry</option>
+                    <option value="electrician">Electrician</option>
+                    <option value="driver">Driver</option>
+                    <option value="helper">Helper</option>
+                    <option value="painter">Painter</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>Min Price (₹)</label>
+                    <input type="number" id="minPrice" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Max Price (₹)</label>
+                    <input type="number" id="maxPrice" placeholder="5000">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Within Distance (km)</label>
+                <input type="number" id="range" placeholder="50">
+            </div>
+
+            <button class="find-btn" onclick="searchNow()">🔍 Confirm & Search</button>
+        </div>
+
+        <div id="results">
+            <div class="no-data">Fill the filters to start searching</div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQaAXGwPClpui0jxUrIPb5qok-pCAG--4",
+            authDomain: "rozgar-sathi-1ae88.firebaseapp.com",
+            databaseURL: "https://rozgar-sathi-1ae88-default-rtdb.firebaseio.com",
+            projectId: "rozgar-sathi-1ae88",
+            appId: "1:78331447702:web:5d932141d7a369091635b7"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let myLat, myLong;
+
+        // Get Current Location for Distance Calculation
+        navigator.geolocation.getCurrentPosition(pos => {
+            myLat = pos.coords.latitude;
+            myLong = pos.coords.longitude;
+        });
+
+        function searchNow() {
+            const role = document.getElementById('role').value;
+            const cat = document.getElementById('category').value;
+            const min = parseInt(document.getElementById('minPrice').value) || 0;
+            const max = parseInt(document.getElementById('maxPrice').value) || 99999;
+            const range = parseInt(document.getElementById('range').value) || 1000;
+            const resultsDiv = document.getElementById('results');
+
+            resultsDiv.innerHTML = "<p style='text-align:center;'>Searching...</p>";
+
+            db.ref('jobApplications').once('value', snapshot => {
+                let html = '';
+                let count = 0;
+
+                snapshot.forEach(child => {
+                    const data = child.val();
+                    
+                    // Filter Logic
+                    const roleMatch = (role === 'all' || data.applicantType === role);
+                    const catMatch = (cat === 'all' || data.mainCategory === cat);
+                    const priceMatch = (data.dailyRate >= min && data.dailyRate <= max);
+                    
+                    // Simple Distance Logic (if Lat/Long exists in data)
+                    // Note: This assumes you save lat/long during posting. 
+                    // If only address is saved, distance filter is hard without Paid Google API.
+                    
+                    if (roleMatch && catMatch && priceMatch) {
+                        count++;
+                        html += `
+                            <div class="result-card ${data.applicantType}">
+                                <div class="distance-tag">₹${data.dailyRate}/day</div>
+                                <h4 style="text-transform:capitalize;">${data.mainCategory}</h4>
+                                <p style="font-size:13px; color:#64748b; margin:5px 0;">📍 ${data.workAddress}</p>
+                                <div style="display:flex; gap:10px; margin-top:10px;">
+                                    <a href="tel:${data.userPhone}" style="flex:1; background:#10b981; color:white; text-align:center; padding:8px; border-radius:8px; text-decoration:none; font-size:12px; font-weight:bold;">Call</a>
+                                    <button onclick="window.open('http://googleusercontent.com/maps.google.com/6{encodeURIComponent(data.workAddress)}')" style="flex:1; background:#f59e0b; color:white; border:none; padding:8px; border-radius:8px; font-size:12px; font-weight:bold;">Map</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                resultsDiv.innerHTML = count > 0 ? html : '<div class="no-data">No results found</div>';
+            });
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            // Formula for distance calculation (KM)
+            const R = 6371; 
+            const dLat = (lat2-lat1) * Math.PI / 180;
+            const dLon = (lon2-lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+    </script>
+</body>
+</html>
