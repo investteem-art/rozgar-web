@@ -113,10 +113,18 @@
         };
 
         function fetchData() {
+            const grid = document.getElementById('workersGrid');
             db.ref('jobApplications').on('value', (snap) => {
                 let entries = [];
-                snap.forEach(child => { entries.push({ id: child.key, ...child.val() }); });
-                render(entries.sort((a, b) => b.timestamp - a.timestamp));
+                if (snap.exists()) {
+                    snap.forEach(child => { entries.push({ id: child.key, ...child.val() }); });
+                    render(entries.sort((a, b) => b.timestamp - a.timestamp));
+                } else {
+                    grid.innerHTML = "<p style='text-align:center; padding:20px; color:#666;'>No posts found.</p>";
+                }
+            }, (error) => {
+                console.error("Firebase Error:", error);
+                grid.innerHTML = "<p style='text-align:center; color:red; padding:20px;'>Permission Denied. Please Login again.</p>";
             });
         }
 
@@ -149,7 +157,15 @@
 
         document.querySelectorAll('.tab-btn').forEach(b => { b.onclick = () => { b.parentElement.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); fetchData(); }; });
 
-        window.onload = () => { if(localStorage.getItem('userPhoto')) profileBtn.innerHTML = `<img src="${localStorage.getItem('userPhoto')}">`; fetchData(); };
+        // Final Security & Loading Fix
+        firebase.auth().onAuthStateChanged(user => { 
+            if(user) {
+                if(localStorage.getItem('userPhoto')) profileBtn.innerHTML = `<img src="${localStorage.getItem('userPhoto')}">`;
+                fetchData(); 
+            } else { 
+                location.href = 'index.html'; 
+            } 
+        });
     </script>
 </body>
 </html>
