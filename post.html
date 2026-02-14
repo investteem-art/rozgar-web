@@ -7,99 +7,46 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1813290992131734"
-     crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1813290992131734" crossorigin="anonymous"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
         body { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; padding: 20px; }
-        
-        .header { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 15px 20px; border-radius: 20px; margin-bottom: 20px; text-align: center; box-shadow: 0 10px 30px rgba(79,172,254,0.4); }
-        .header h1 { font-size: 24px; margin-bottom: 5px; }
-        
-        .container { max-width: 500px; margin: 0 auto; background: rgba(255,255,255,0.95); border-radius: 25px; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
-        
-        .form-group { margin-bottom: 25px; }
-        .form-group label { display: block; margin-bottom: 8px; color: #1e293b; font-weight: 600; font-size: 16px; }
-        .form-group select, .form-group input, .form-group textarea { width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 15px; font-size: 16px; transition: all 0.3s; background: #f8fafc; }
-        .form-group select:focus, .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #4facfe; box-shadow: 0 0 20px rgba(79,172,254,0.2); background: white; }
-        
-        .sub-category, .other-category { display: none; margin-top: 15px; }
-        .sub-category.active, .other-category.active { display: block; animation: slideDown 0.3s ease; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .location-group { position: relative; }
-        .get-location-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-size: 14px; }
-        .get-location-btn:hover { background: #059669; }
-        
-        .row { display: flex; gap: 15px; }
-        .row .form-group { flex: 1; }
-        
-        .btn { width: 100%; padding: 18px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 15px; font-size: 18px; font-weight: 700; cursor: pointer; transition: all 0.3s; margin-top: 10px; position: relative; }
-        .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(16,185,129,0.4); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        
-        .back-btn { background: #6b7280; margin-bottom: 20px; }
-        .back-btn:hover { background: #4b5563; }
-        
-        /* Video Ad Modal */
-        .video-ad-modal { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center;
-        }
-        .video-ad-modal.active { display: flex; }
-        .video-container { position: relative; max-width: 90%; max-height: 90%; }
-        .video-ad { width: 100%; height: auto; border-radius: 15px; }
-        .skip-btn { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.9); color: #000; border: none; padding: 12px 20px; border-radius: 25px; font-weight: 700; cursor: pointer; font-size: 16px; }
-        .skip-btn:hover { background: white; }
-        
-        /* Banner Ad */
-        .banner-ad { margin: 20px 0; text-align: center; }
-        
+        .header { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 15px; border-radius: 20px; margin-bottom: 20px; text-align: center; box-shadow: 0 10px 30px rgba(79,172,254,0.4); }
+        .container { max-width: 500px; margin: 0 auto; background: white; border-radius: 25px; padding: 25px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #1e293b; }
+        input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 15px; background: #f8fafc; }
+        .sub-category, .other-category { display: none; margin-top: 10px; }
+        .active { display: block; }
+        .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-submit { background: #10b981; color: white; font-size: 16px; margin-top: 10px; }
+        .back-btn { background: #6b7280; color: white; margin-bottom: 15px; }
         .hidden { display: none !important; }
-        .success-screen { text-align: center; padding: 40px; color: #166534; }
-        .success-icon { font-size: 64px; margin-bottom: 20px; }
-        
-        @media (max-width: 480px) { .row { flex-direction: column; gap: 0; } }
+        .video-ad-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; }
+        .video-ad-modal.active { display: flex; }
     </style>
 </head>
 <body>
-    <!-- Banner Ad -->
-    <div class="banner-ad">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-1813290992131734"
-             data-ad-slot="7709399088"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-    </div>
 
-    <div class="header">
-        <h1>📋 Job Application</h1>
-        <p>Fill your work details</p>
-    </div>
+    <div class="header"><h1>📋 Job Application</h1></div>
 
     <div class="container">
         <button class="btn back-btn" onclick="goBack()">← Back to Jobs</button>
         
         <form id="jobApplicationForm">
-            <!-- NEW: Applicant Type -->
             <div class="form-group">
                 <label>👤 Who are you?</label>
                 <select id="applicantType" required>
-                    <option value="">Select your role</option>
-                    <option value="owner">🏢 Owner / Contractor</option>
-                    <option value="worker">👷 Individual Worker</option>
+                    <option value="">Select role</option>
+                    <option value="owner">🏢 Owner</option>
+                    <option value="worker">👷 Worker</option>
                 </select>
             </div>
 
-            <!-- Category Selection -->
             <div class="form-group">
-                <label>🎯 What work do you do?</label>
+                <label>🎯 Work Category</label>
                 <select id="mainCategory" required>
-                    <option value="">Select your work</option>
+                    <option value="">Select category</option>
                     <option value="plumber">🚿 Plumber</option>
                     <option value="mistry">👷 Mistry</option>
                     <option value="electrician">⚡ Electrician</option>
@@ -110,171 +57,103 @@
                 </select>
             </div>
 
-            <!-- Mistry Sub-categories (Simplified) -->
             <div class="form-group sub-category" id="mistrySubCategory">
                 <label>🔧 Mistry Type</label>
                 <select id="subCategory">
-                    <option value="">Select mistry type</option>
-                    <option value="tall_pathar">🔨 Tall/Pathar</option>
-                    <option value="pilastr_chinai">🏗️ Pilastr/Chinai</option>
-                    <option value="aourundr">🔩 Aourundr</option>
+                    <option value="">Select type</option>
+                    <option value="tall_pathar">Tall/Pathar</option>
+                    <option value="pilastr_chinai">Pilastr/Chinai</option>
+                    <option value="arounder">Arounder</option>
                 </select>
             </div>
 
-            <!-- Other Category Input -->
             <div class="form-group other-category" id="otherCategory">
-                <label>💼 Other work name</label>
-                <input type="text" id="otherWorkName" placeholder="Write other work">
+                <label>💼 Work Name</label>
+                <input type="text" id="otherWorkName" placeholder="Job name">
             </div>
 
-            <!-- Rate per day -->
             <div class="form-group">
                 <label>💰 Daily Rate (₹)</label>
-                <input type="number" id="dailyRate" placeholder="500" min="100" required>
+                <input type="number" id="dailyRate" placeholder="500" required>
             </div>
 
-            <!-- Number of workers -->
             <div class="form-group">
                 <label>👥 Number of Workers</label>
-                <input type="number" id="workersCount" placeholder="1" min="1" max="50" required>
+                <input type="number" id="workersCount" placeholder="1" required>
             </div>
 
-            <!-- Address -->
-            <div class="form-group location-group">
-                <label>📍 Work Address</label>
-                <input type="text" id="workAddress" placeholder="Enter complete address" required>
-                <button type="button" class="get-location-btn" onclick="getCurrentLocation()">📍 Live Location</button>
-            </div>
-
-            <!-- Description -->
             <div class="form-group">
-                <label>📝 Work Description</label>
-                <textarea id="description" rows="4" placeholder="Write work details..." required></textarea>
+                <label>📍 Work Address</label>
+                <input type="text" id="workAddress" placeholder="Address" required>
+                <button type="button" onclick="getCurrentLocation()" style="background:none; border:none; color:#10b981; font-weight:bold; cursor:pointer; margin-top:5px;">📍 Get Live Location</button>
             </div>
 
-            <!-- Submit Button -->
-            <button type="submit" class="btn" id="submitBtn">
-                ✅ Confirm & Submit
-            </button>
+            <div class="form-group">
+                <label>📝 Description</label>
+                <textarea id="description" rows="3" placeholder="Work details..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-submit" id="submitBtn">✅ Confirm & Submit</button>
         </form>
 
-        <!-- Success Screen -->
-        <div id="successScreen" class="success-screen hidden">
-            <div class="success-icon">✅</div>
-            <h2>Application Submitted!</h2>
-            <p>Your job application has been sent successfully. We will contact you soon on your registered mobile number.</p>
-            <button class="btn" onclick="goBack()">Find More Jobs</button>
+        <div id="successScreen" class="hidden" style="text-align:center;">
+            <h2 style="color:#10b981;">✅ Submitted!</h2>
+            <p>Your post is live.</p>
+            <button class="btn btn-submit" onclick="goBack()">View Jobs</button>
         </div>
     </div>
 
-    <!-- Video Ad Modal -->
     <div class="video-ad-modal" id="videoAdModal">
-        <div class="video-container">
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-1813290992131734"
-                 data-ad-slot="9760847359"></ins>
-            <script>
-                (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
-            
-            <video class="video-ad" id="adVideo" controls>
+        <div style="position:relative; width:90%;">
+            <video id="adVideo" style="width:100%; border-radius:15px;" controls>
                 <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
             </video>
-            
-            <button class="skip-btn" id="skipAdBtn" onclick="skipAd()" style="display: none;">Skip Ad (5s)</button>
+            <button id="skipAdBtn" onclick="skipAd()" style="position:absolute; top:10px; right:10px; padding:10px; background:white; border-radius:20px; font-weight:bold; display:none;">Skip</button>
         </div>
     </div>
 
     <script>
-        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDQaAXGwPClpui0jxUrIPb5qok-pCAG--4",
             authDomain: "rozgar-sathi-1ae88.firebaseapp.com",
             databaseURL: "https://rozgar-sathi-1ae88-default-rtdb.firebaseio.com",
             projectId: "rozgar-sathi-1ae88",
-            storageBucket: "rozgar-sathi-1ae88.firebasestorage.app",
-            messagingSenderId: "78331447702",
             appId: "1:78331447702:web:5d932141d7a369091635b7"
         };
-
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // Language state (English by default)
-        let currentLang = 'en';
+        auth.onAuthStateChanged(user => { if (!user) window.location.href = 'index.html'; });
 
-        // Check auth
-        auth.onAuthStateChanged((user) => {
-            if (!user || localStorage.getItem('rozgarSathiLoggedIn') !== 'true') {
-                window.location.href = 'index.html';
-            }
-        });
+        document.getElementById('mainCategory').onchange = function() {
+            document.getElementById('mistrySubCategory').classList.toggle('active', this.value === 'mistry');
+            document.getElementById('otherCategory').classList.toggle('active', this.value === 'other');
+        };
 
-        // Category handlers
-        document.getElementById('mainCategory').addEventListener('change', function() {
-            const mistryDiv = document.getElementById('mistrySubCategory');
-            const otherDiv = document.getElementById('otherCategory');
-            
-            mistryDiv.classList.remove('active');
-            otherDiv.classList.remove('active');
-            document.getElementById('subCategory').value = '';
-            document.getElementById('otherWorkName').value = '';
-            
-            if (this.value === 'mistry') {
-                mistryDiv.classList.add('active');
-            } else if (this.value === 'other') {
-                otherDiv.classList.add('active');
-            }
-        });
-
-        let adTimer;
-        // Form submit with Video Ad
-        document.getElementById('jobApplicationForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            showVideoAd();
-        });
+        document.getElementById('jobApplicationForm').onsubmit = (e) => { e.preventDefault(); showVideoAd(); };
 
         function showVideoAd() {
             const modal = document.getElementById('videoAdModal');
-            const skipBtn = document.getElementById('skipAdBtn');
-            const video = document.getElementById('adVideo');
-            
             modal.classList.add('active');
+            const video = document.getElementById('adVideo');
             video.play();
-            
-            skipBtn.style.display = 'block';
-            let skipTime = 5;
-            skipBtn.textContent = `Skip Ad (${skipTime}s)`;
-            
-            adTimer = setInterval(() => {
-                skipTime--;
-                skipBtn.textContent = `Skip Ad (${skipTime}s)`;
-                if (skipTime <= 0) {
-                    clearInterval(adTimer);
-                    skipAd();
-                }
-            }, 1000);
+            setTimeout(() => { document.getElementById('skipAdBtn').style.display = 'block'; }, 5000);
         }
 
         function skipAd() {
-            clearInterval(adTimer);
             document.getElementById('videoAdModal').classList.remove('active');
             document.getElementById('adVideo').pause();
-            document.getElementById('adVideo').currentTime = 0;
-            document.getElementById('skipAdBtn').style.display = 'none';
             submitApplication();
         }
 
         async function submitApplication() {
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.classList.add('loading');
-            submitBtn.innerHTML = '⏳ Submitting...';
-
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true; btn.innerHTML = '⏳ Submitting...';
             try {
-                const formData = {
+                const user = auth.currentUser;
+                const data = {
+                    uid: user.uid, // 500 Error Fix: Rules ke liye zaroori
                     applicantType: document.getElementById('applicantType').value,
                     mainCategory: document.getElementById('mainCategory').value,
                     subCategory: document.getElementById('subCategory').value || null,
@@ -283,47 +162,25 @@
                     workersCount: parseInt(document.getElementById('workersCount').value),
                     workAddress: document.getElementById('workAddress').value,
                     description: document.getElementById('description').value,
-                    userPhone: auth.currentUser.phoneNumber,
-                    timestamp: Date.now(),
-                    status: 'pending'
+                    userPhone: user.phoneNumber || "No Phone",
+                    userPhoto: localStorage.getItem('userPhoto') || '', // Home par photo ke liye
+                    timestamp: Date.now()
                 };
-
-                await db.ref('jobApplications').push(formData);
-                
+                await db.ref('jobApplications').push(data);
                 document.getElementById('jobApplicationForm').classList.add('hidden');
                 document.getElementById('successScreen').classList.remove('hidden');
-                
-            } catch (error) {
-                alert('Error: ' + error.message);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('loading');
-                submitBtn.innerHTML = '✅ Confirm & Submit';
-            }
+            } catch (err) { alert(err.message); }
+            finally { btn.disabled = false; btn.innerHTML = '✅ Submit'; }
         }
 
         function getCurrentLocation() {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    
-                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            const address = data.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-                            document.getElementById('workAddress').value = address;
-                        })
-                        .catch(() => {
-                            document.getElementById('workAddress').value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-                        });
-                }, () => alert('Please allow location access'));
+                navigator.geolocation.getCurrentPosition(pos => {
+                    document.getElementById('workAddress').value = `${pos.coords.latitude}, ${pos.coords.longitude}`;
+                });
             }
         }
-
-        function goBack() {
-            window.location.href = 'home.html';
-        }
+        function goBack() { window.location.href = 'home.html'; }
     </script>
 </body>
 </html>
