@@ -117,7 +117,10 @@
             db.ref('jobApplications').on('value', (snap) => {
                 let entries = [];
                 if (snap.exists()) {
-                    snap.forEach(child => { entries.push({ id: child.key, ...child.val() }); });
+                    snap.forEach(child => { 
+                        // Null Check: Agar data galat ho to skip kare
+                        if(child.val()) entries.push({ id: child.key, ...child.val() }); 
+                    });
                     render(entries.sort((a, b) => b.timestamp - a.timestamp));
                 } else {
                     grid.innerHTML = "<p style='text-align:center; padding:20px; color:#666;'>No posts found.</p>";
@@ -134,30 +137,40 @@
             const cat = document.querySelector('#catTabs .active').dataset.cat;
             
             grid.innerHTML = data.filter(i => (role === 'all' || i.applicantType === role) && (cat === 'all' || i.mainCategory === cat))
-            .map(i => `
-                <div class="card ${i.applicantType}">
+            .map(i => {
+                // Formatting values for safe rendering
+                const title = i.mainCategory === 'other' ? (i.otherWorkName || 'Other') : (i.mainCategory || 'Job');
+                const address = i.workAddress || 'No Address';
+                
+                return `
+                <div class="card ${i.applicantType || 'worker'}">
                     <div class="card-head">
                         <img src="${i.userPhoto || 'https://via.placeholder.com/50'}" class="user-photo">
                         <div style="flex:1">
-                            <h3 style="text-transform: capitalize; font-size:15px;">${i.mainCategory === 'other' ? i.otherWorkName : i.mainCategory}</h3>
-                            <span class="badge ${i.applicantType === 'owner' ? 'badge-owner' : 'badge-worker'}">${i.applicantType}</span>
+                            <h3 style="text-transform: capitalize; font-size:15px;">${title}</h3>
+                            <span class="badge ${i.applicantType === 'owner' ? 'badge-owner' : 'badge-worker'}">
+                                ${i.applicantType || 'worker'}
+                            </span>
                         </div>
                         <div class="icon-box">${getIcon(i.mainCategory)}</div>
                     </div>
-                    <div style="font-size:13px; color:#475569;">📍 ${i.workAddress}<br>👥 Workers: ${i.workersCount} | <b>₹${i.dailyRate}</b></div>
-                    <div class="actions">
-                        <a href="tel:${i.userPhone}" class="btn btn-call">Call</a>
-                        <a href="sms:${i.userPhone}" class="btn btn-msg">SMS</a>
-                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(i.workAddress)}" target="_blank" class="btn btn-map">Map</a>
+                    <div style="font-size:13px; color:#475569;">
+                        📍 ${address}<br>
+                        👥 Workers: ${i.workersCount || 0} | <b>₹${i.dailyRate || 0}</b>
                     </div>
-                </div>`).join('');
+                    <div class="actions">
+                        <a href="tel:${i.userPhone || ''}" class="btn btn-call">Call</a>
+                        <a href="sms:${i.userPhone || ''}" class="btn btn-msg">SMS</a>
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}" target="_blank" class="btn btn-map">Map</a>
+                    </div>
+                </div>`;
+            }).join('');
         }
 
         function getIcon(cat) { const icons = { plumber:'🚿', mistry:'👷', electrician:'⚡', driver:'🚗', helper:'🤝', painter:'🎨', other:'💼' }; return icons[cat] || '🛠️'; }
 
         document.querySelectorAll('.tab-btn').forEach(b => { b.onclick = () => { b.parentElement.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); fetchData(); }; });
 
-        // Final Security & Loading Fix
         firebase.auth().onAuthStateChanged(user => { 
             if(user) {
                 if(localStorage.getItem('userPhoto')) profileBtn.innerHTML = `<img src="${localStorage.getItem('userPhoto')}">`;
