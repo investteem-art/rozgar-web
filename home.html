@@ -17,10 +17,10 @@
             padding: 12px 15px; position: fixed; top: 0; width: 100%; z-index: 1000; 
             display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        .nav-left, .nav-right { display: flex; align-items: center; gap: 12px; color: white; }
+        .nav-left { display: flex; align-items: center; gap: 15px; }
         .profile-btn { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,0.3); border: 2px solid white; cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .profile-btn img { width: 100%; height: 100%; object-fit: cover; }
-        .brand-name { font-weight: bold; font-size: 18px; }
+        .find-link { font-size: 24px; color: white; text-decoration: none; }
 
         .filters { background: white; padding: 15px; margin: 10px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .tab-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
@@ -52,7 +52,7 @@
     <div class="top-nav">
         <div class="nav-left">
             <div class="profile-btn" id="profileIcon">👤</div>
-            <span class="brand-name">RozgarSathi</span>
+            <a href="find.html" class="find-link">🔍</a>
         </div>
         <div class="nav-right">
             <a href="line.html" style="color:white; text-decoration:none; font-size:24px;">☰</a>
@@ -96,18 +96,29 @@
         
         const profileBtn = document.getElementById('profileIcon');
         const photoInput = document.getElementById('photoInput');
-        let pressTimer, isLongPress = false;
+        let pressTimer;
 
-        profileBtn.addEventListener('mousedown', () => { isLongPress = false; pressTimer = setTimeout(() => { isLongPress = true; photoInput.click(); }, 800); });
-        profileBtn.addEventListener('touchstart', () => { isLongPress = false; pressTimer = setTimeout(() => { isLongPress = true; photoInput.click(); }, 800); });
-        profileBtn.addEventListener('mouseup', () => { clearTimeout(pressTimer); if(!isLongPress) location.href = 'profile.html'; });
-        profileBtn.addEventListener('touchend', () => { clearTimeout(pressTimer); if(!isLongPress) location.href = 'profile.html'; });
+        // --- Long Press Logic (फोटो बदलने के लिए) ---
+        profileBtn.addEventListener('mousedown', () => { pressTimer = setTimeout(() => { photoInput.click(); }, 800); });
+        profileBtn.addEventListener('touchstart', () => { pressTimer = setTimeout(() => { photoInput.click(); }, 800); });
+        profileBtn.addEventListener('mouseup', () => { clearTimeout(pressTimer); });
+        profileBtn.addEventListener('touchend', () => { clearTimeout(pressTimer); });
+
+        // Normal Click (प्रोफाइल पर जाने के लिए)
+        profileBtn.addEventListener('click', (e) => {
+            if (e.detail === 1) { 
+                setTimeout(() => { if (!photoInput.value) location.href = 'profile.html'; }, 200);
+            }
+        });
 
         photoInput.onchange = (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (ev) => { profileBtn.innerHTML = `<img src="${ev.target.result}">`; localStorage.setItem('userPhoto', ev.target.result); };
+                reader.onload = (ev) => { 
+                    profileBtn.innerHTML = `<img src="${ev.target.result}">`; 
+                    localStorage.setItem('userPhoto', ev.target.result); 
+                };
                 reader.readAsDataURL(file);
             }
         };
@@ -118,7 +129,6 @@
                 let entries = [];
                 if (snap.exists()) {
                     snap.forEach(child => { 
-                        // Null Check: Agar data galat ho to skip kare
                         if(child.val()) entries.push({ id: child.key, ...child.val() }); 
                     });
                     render(entries.sort((a, b) => b.timestamp - a.timestamp));
@@ -126,8 +136,7 @@
                     grid.innerHTML = "<p style='text-align:center; padding:20px; color:#666;'>No posts found.</p>";
                 }
             }, (error) => {
-                console.error("Firebase Error:", error);
-                grid.innerHTML = "<p style='text-align:center; color:red; padding:20px;'>Permission Denied. Please Login again.</p>";
+                grid.innerHTML = "<p style='text-align:center; color:red; padding:20px;'>Permission Denied.</p>";
             });
         }
 
@@ -138,30 +147,26 @@
             
             grid.innerHTML = data.filter(i => (role === 'all' || i.applicantType === role) && (cat === 'all' || i.mainCategory === cat))
             .map(i => {
-                // Formatting values for safe rendering
                 const title = i.mainCategory === 'other' ? (i.otherWorkName || 'Other') : (i.mainCategory || 'Job');
                 const address = i.workAddress || 'No Address';
-                
+                // 500 Error Fix: Map link logic
+                const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+
                 return `
                 <div class="card ${i.applicantType || 'worker'}">
                     <div class="card-head">
                         <img src="${i.userPhoto || 'https://via.placeholder.com/50'}" class="user-photo">
                         <div style="flex:1">
                             <h3 style="text-transform: capitalize; font-size:15px;">${title}</h3>
-                            <span class="badge ${i.applicantType === 'owner' ? 'badge-owner' : 'badge-worker'}">
-                                ${i.applicantType || 'worker'}
-                            </span>
+                            <span class="badge ${i.applicantType === 'owner' ? 'badge-owner' : 'badge-worker'}">${i.applicantType || 'worker'}</span>
                         </div>
                         <div class="icon-box">${getIcon(i.mainCategory)}</div>
                     </div>
-                    <div style="font-size:13px; color:#475569;">
-                        📍 ${address}<br>
-                        👥 Workers: ${i.workersCount || 0} | <b>₹${i.dailyRate || 0}</b>
-                    </div>
+                    <div style="font-size:13px; color:#475569;">📍 ${address}<br>👥 Workers: ${i.workersCount || 0} | <b>₹${i.dailyRate || 0}</b></div>
                     <div class="actions">
                         <a href="tel:${i.userPhone || ''}" class="btn btn-call">Call</a>
                         <a href="sms:${i.userPhone || ''}" class="btn btn-msg">SMS</a>
-                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}" target="_blank" class="btn btn-map">Map</a>
+                        <a href="${mapLink}" target="_blank" class="btn btn-map">Map</a>
                     </div>
                 </div>`;
             }).join('');
@@ -169,15 +174,19 @@
 
         function getIcon(cat) { const icons = { plumber:'🚿', mistry:'👷', electrician:'⚡', driver:'🚗', helper:'🤝', painter:'🎨', other:'💼' }; return icons[cat] || '🛠️'; }
 
-        document.querySelectorAll('.tab-btn').forEach(b => { b.onclick = () => { b.parentElement.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); fetchData(); }; });
+        document.querySelectorAll('.tab-btn').forEach(b => { 
+            b.onclick = () => { 
+                b.parentElement.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active')); 
+                b.classList.add('active'); fetchData(); 
+            }; 
+        });
 
         firebase.auth().onAuthStateChanged(user => { 
             if(user) {
-                if(localStorage.getItem('userPhoto')) profileBtn.innerHTML = `<img src="${localStorage.getItem('userPhoto')}">`;
+                const savedPhoto = localStorage.getItem('userPhoto');
+                if(savedPhoto) profileBtn.innerHTML = `<img src="${savedPhoto}">`;
                 fetchData(); 
-            } else { 
-                location.href = 'index.html'; 
-            } 
+            } else { location.href = 'index.html'; } 
         });
     </script>
 </body>
