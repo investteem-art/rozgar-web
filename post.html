@@ -3,23 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RozgarSathi - Apply Job</title>
+    <title>Post Job - RozgarSathi</title>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1813290992131734" crossorigin="anonymous"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; padding: 20px; }
         .header { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 15px; border-radius: 20px; margin-bottom: 20px; text-align: center; box-shadow: 0 10px 30px rgba(79,172,254,0.4); }
         .container { max-width: 500px; margin: 0 auto; background: white; border-radius: 25px; padding: 25px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #1e293b; }
-        input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 15px; background: #f8fafc; }
-        .sub-category, .other-category { display: none; margin-top: 10px; }
+        input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 15px; background: #f8fafc; outline: none; }
+        
+        /* Show/Hide Logic */
+        .sub-box { display: none; margin-top: 10px; }
         .active { display: block; }
+
         .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .btn-submit { background: #10b981; color: white; font-size: 16px; margin-top: 10px; }
+        .btn-loc { width: 60px; background: #3b82f6; color: white; border-radius: 12px; border: none; font-size: 24px; cursor: pointer; }
         .back-btn { background: #6b7280; color: white; margin-bottom: 15px; }
         .hidden { display: none !important; }
         .video-ad-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; }
@@ -31,22 +34,20 @@
     <div class="header"><h1>📋 Job Application</h1></div>
 
     <div class="container">
-        <button class="btn back-btn" onclick="goBack()">← Back to Jobs</button>
+        <button class="btn back-btn" onclick="location.href='home.html'">← Back to Jobs</button>
         
-        <form id="jobApplicationForm">
+        <form id="jobForm">
             <div class="form-group">
                 <label>👤 Who are you?</label>
                 <select id="applicantType" required>
-                    <option value="">Select role</option>
                     <option value="owner">🏢 Owner</option>
                     <option value="worker">👷 Worker</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label>🎯 Work Category</label>
-                <select id="mainCategory" required>
-                    <option value="">Select category</option>
+                <label>🎯 Category</label>
+                <select id="mainCategory" onchange="toggleExtraBoxes()" required>
                     <option value="plumber">🚿 Plumber</option>
                     <option value="mistry">👷 Mistry</option>
                     <option value="electrician">⚡ Electrician</option>
@@ -57,49 +58,44 @@
                 </select>
             </div>
 
-            <div class="form-group sub-category" id="mistrySubCategory">
+            <div class="form-group sub-box" id="mistryBox">
                 <label>🔧 Mistry Type</label>
                 <select id="subCategory">
-                    <option value="">Select type</option>
                     <option value="tall_pathar">Tall/Pathar</option>
                     <option value="pilastr_chinai">Pilastr/Chinai</option>
                     <option value="arounder">Arounder</option>
                 </select>
             </div>
 
-            <div class="form-group other-category" id="otherCategory">
+            <div class="form-group sub-box" id="otherBox">
                 <label>💼 Work Name</label>
-                <input type="text" id="otherWorkName" placeholder="Job name">
+                <input type="text" id="otherWorkName" placeholder="Enter Job name">
             </div>
 
             <div class="form-group">
                 <label>💰 Daily Rate (₹)</label>
-                <input type="number" id="dailyRate" placeholder="500" required>
+                <input type="number" id="dailyRate" required>
             </div>
 
             <div class="form-group">
-                <label>👥 Number of Workers</label>
-                <input type="number" id="workersCount" placeholder="1" required>
-            </div>
-
-            <div class="form-group">
-                <label>📍 Work Address</label>
-                <input type="text" id="workAddress" placeholder="Address" required>
-                <button type="button" onclick="getCurrentLocation()" style="background:none; border:none; color:#10b981; font-weight:bold; cursor:pointer; margin-top:5px;">📍 Get Live Location</button>
+                <label>📍 Work Location (GPS Only)</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="workAddress" placeholder="Click 📍 to get location" readonly required style="background: #e2e8f0;">
+                    <button type="button" class="btn-loc" onclick="getLiveLocation()">📍</button>
+                </div>
             </div>
 
             <div class="form-group">
                 <label>📝 Description</label>
-                <textarea id="description" rows="3" placeholder="Work details..." required></textarea>
+                <textarea id="description" rows="3" required></textarea>
             </div>
 
             <button type="submit" class="btn btn-submit" id="submitBtn">✅ Confirm & Submit</button>
         </form>
 
         <div id="successScreen" class="hidden" style="text-align:center;">
-            <h2 style="color:#10b981;">✅ Submitted!</h2>
-            <p>Your post is live.</p>
-            <button class="btn btn-submit" onclick="goBack()">View Jobs</button>
+            <h2 style="color:#10b981;">✅ Published!</h2>
+            <button class="btn btn-submit" onclick="location.href='home.html'">Back to Home</button>
         </div>
     </div>
 
@@ -121,66 +117,58 @@
             appId: "1:78331447702:web:5d932141d7a369091635b7"
         };
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
         const db = firebase.database();
 
-        auth.onAuthStateChanged(user => { if (!user) window.location.href = 'index.html'; });
-
-        document.getElementById('mainCategory').onchange = function() {
-            document.getElementById('mistrySubCategory').classList.toggle('active', this.value === 'mistry');
-            document.getElementById('otherCategory').classList.toggle('active', this.value === 'other');
-        };
-
-        document.getElementById('jobApplicationForm').onsubmit = (e) => { e.preventDefault(); showVideoAd(); };
-
-        function showVideoAd() {
-            const modal = document.getElementById('videoAdModal');
-            modal.classList.add('active');
-            const video = document.getElementById('adVideo');
-            video.play();
-            setTimeout(() => { document.getElementById('skipAdBtn').style.display = 'block'; }, 5000);
+        // Extra Boxes Logic
+        function toggleExtraBoxes() {
+            const cat = document.getElementById('mainCategory').value;
+            document.getElementById('mistryBox').classList.toggle('active', cat === 'mistry');
+            document.getElementById('otherBox').classList.toggle('active', cat === 'other');
         }
+
+        function getLiveLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    document.getElementById('workAddress').value = pos.coords.latitude + "," + pos.coords.longitude;
+                }, () => alert("Enable GPS"), { enableHighAccuracy: true });
+            }
+        }
+
+        document.getElementById('jobForm').onsubmit = (e) => { 
+            e.preventDefault(); 
+            if(!document.getElementById('workAddress').value) return alert("Get location first!");
+            document.getElementById('videoAdModal').classList.add('active');
+            document.getElementById('adVideo').play();
+            setTimeout(() => { document.getElementById('skipAdBtn').style.display = 'block'; }, 5000);
+        };
 
         function skipAd() {
             document.getElementById('videoAdModal').classList.remove('active');
-            document.getElementById('adVideo').pause();
-            submitApplication();
+            submitData();
         }
 
-        async function submitApplication() {
+        async function submitData() {
             const btn = document.getElementById('submitBtn');
-            btn.disabled = true; btn.innerHTML = '⏳ Submitting...';
+            const user = firebase.auth().currentUser;
+            const data = {
+                uid: user.uid,
+                applicantType: document.getElementById('applicantType').value,
+                mainCategory: document.getElementById('mainCategory').value,
+                subCategory: document.getElementById('subCategory').value || null,
+                otherWorkName: document.getElementById('otherWorkName').value || null,
+                dailyRate: document.getElementById('dailyRate').value,
+                workAddress: document.getElementById('workAddress').value,
+                description: document.getElementById('description').value,
+                userPhone: user.phoneNumber,
+                userPhoto: localStorage.getItem('userPhoto') || '',
+                timestamp: Date.now()
+            };
             try {
-                const user = auth.currentUser;
-                const data = {
-                    uid: user.uid, // 500 Error Fix: Rules ke liye zaroori
-                    applicantType: document.getElementById('applicantType').value,
-                    mainCategory: document.getElementById('mainCategory').value,
-                    subCategory: document.getElementById('subCategory').value || null,
-                    otherWorkName: document.getElementById('otherWorkName').value || null,
-                    dailyRate: parseInt(document.getElementById('dailyRate').value),
-                    workersCount: parseInt(document.getElementById('workersCount').value),
-                    workAddress: document.getElementById('workAddress').value,
-                    description: document.getElementById('description').value,
-                    userPhone: user.phoneNumber || "No Phone",
-                    userPhoto: localStorage.getItem('userPhoto') || '', // Home par photo ke liye
-                    timestamp: Date.now()
-                };
                 await db.ref('jobApplications').push(data);
-                document.getElementById('jobApplicationForm').classList.add('hidden');
+                document.getElementById('jobForm').classList.add('hidden');
                 document.getElementById('successScreen').classList.remove('hidden');
-            } catch (err) { alert(err.message); }
-            finally { btn.disabled = false; btn.innerHTML = '✅ Submit'; }
+            } catch(err) { alert(err.message); }
         }
-
-        function getCurrentLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    document.getElementById('workAddress').value = `${pos.coords.latitude}, ${pos.coords.longitude}`;
-                });
-            }
-        }
-        function goBack() { window.location.href = 'home.html'; }
     </script>
 </body>
 </html>

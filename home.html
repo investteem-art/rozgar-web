@@ -7,11 +7,11 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1813290992131734" crossorigin="anonymous"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #f4f7f6; padding-top: 70px; padding-bottom: 20px; }
+        body { background: #f4f7f6; padding-top: 75px; padding-bottom: 20px; }
 
+        /* Top Navigation */
         .top-nav { 
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
             padding: 12px 15px; position: fixed; top: 0; width: 100%; z-index: 1000; 
@@ -21,18 +21,23 @@
         .profile-btn { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,0.3); border: 2px solid white; cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .profile-btn img { width: 100%; height: 100%; object-fit: cover; }
         .find-link { font-size: 24px; color: white; text-decoration: none; }
+        
+        .nav-right { display: flex; align-items: center; gap: 15px; }
+        .loc-btn { background: none; border: none; color: white; font-size: 22px; cursor: pointer; }
 
+        /* Filters */
         .filters { background: white; padding: 15px; margin: 10px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .tab-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
         .tab-btn { padding: 10px 20px; border: 1px solid #e2e8f0; background: white; border-radius: 25px; cursor: pointer; font-weight: 600; font-size: 14px; white-space: nowrap; }
         .tab-btn.active { background: #4facfe; color: white; border-color: #4facfe; }
 
+        /* Grid & Cards */
         .grid { padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; }
-        .card { background: white; border-radius: 20px; padding: 15px; border-left: 6px solid #10b981; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .card { background: white; border-radius: 20px; padding: 15px; border-left: 6px solid #10b981; box-shadow: 0 5px 15px rgba(0,0,0,0.05); position: relative; }
         .card.owner { border-left-color: #f59e0b; }
         .card-head { display: flex; gap: 12px; margin-bottom: 10px; align-items: center; }
         .user-photo { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #eee; }
-        .icon-box { width: 40px; height: 40px; background: #f0fdfa; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .dist-tag { background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-left: 5px; }
         
         .badge { font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 5px; text-transform: uppercase; }
         .badge-worker { background: #d1fae5; color: #065f46; }
@@ -41,7 +46,6 @@
         .actions { display: flex; gap: 8px; margin-top: 15px; }
         .btn { flex: 1; padding: 10px; border-radius: 10px; color: white; font-weight: bold; text-align: center; text-decoration: none; font-size: 12px; }
         .btn-call { background: #10b981; }
-        .btn-msg { background: #3b82f6; }
         .btn-map { background: #f59e0b; }
 
         .floating-btn { position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; background: linear-gradient(135deg, #ff416c, #ff4b2b); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-size: 40px; font-weight: bold; box-shadow: 0 10px 20px rgba(255, 75, 43, 0.4); z-index: 2000; }
@@ -55,6 +59,7 @@
             <a href="find.html" class="find-link">🔍</a>
         </div>
         <div class="nav-right">
+            <button class="loc-btn" onclick="sortByNearby()">📍</button>
             <a href="line.html" style="color:white; text-decoration:none; font-size:24px;">☰</a>
         </div>
     </div>
@@ -80,7 +85,6 @@
     </div>
 
     <div class="grid" id="workersGrid"></div>
-
     <a href="post.html" class="floating-btn">+</a>
 
     <script>
@@ -96,19 +100,16 @@
         
         const profileBtn = document.getElementById('profileIcon');
         const photoInput = document.getElementById('photoInput');
-        let pressTimer;
+        let pressTimer, userLat = null, userLong = null;
 
-        // --- Long Press Logic (फोटो बदलने के लिए) ---
+        // Long Press Photo Change
         profileBtn.addEventListener('mousedown', () => { pressTimer = setTimeout(() => { photoInput.click(); }, 800); });
         profileBtn.addEventListener('touchstart', () => { pressTimer = setTimeout(() => { photoInput.click(); }, 800); });
         profileBtn.addEventListener('mouseup', () => { clearTimeout(pressTimer); });
         profileBtn.addEventListener('touchend', () => { clearTimeout(pressTimer); });
 
-        // Normal Click (प्रोफाइल पर जाने के लिए)
         profileBtn.addEventListener('click', (e) => {
-            if (e.detail === 1) { 
-                setTimeout(() => { if (!photoInput.value) location.href = 'profile.html'; }, 200);
-            }
+            if (e.detail === 1) { setTimeout(() => { if (!photoInput.value) location.href = 'profile.html'; }, 200); }
         });
 
         photoInput.onchange = (e) => {
@@ -123,20 +124,46 @@
             }
         };
 
+        // Haversine Formula for Distance
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(1);
+        }
+
+        function sortByNearby() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    userLat = pos.coords.latitude; userLong = pos.coords.longitude;
+                    fetchData();
+                    alert("Showing nearest jobs first!");
+                }, () => alert("Enable GPS to sort by distance"));
+            }
+        }
+
         function fetchData() {
             const grid = document.getElementById('workersGrid');
+            const currentUser = firebase.auth().currentUser;
             db.ref('jobApplications').on('value', (snap) => {
                 let entries = [];
                 if (snap.exists()) {
                     snap.forEach(child => { 
-                        if(child.val()) entries.push({ id: child.key, ...child.val() }); 
+                        const data = child.val();
+                        if(data && currentUser && data.uid !== currentUser.uid) {
+                            let dist = null;
+                            if(userLat && data.workAddress && data.workAddress.includes(',')) {
+                                const [tLat, tLong] = data.workAddress.split(',').map(Number);
+                                dist = calculateDistance(userLat, userLong, tLat, tLong);
+                            }
+                            entries.push({ id: child.key, distance: dist, ...data }); 
+                        }
                     });
-                    render(entries.sort((a, b) => b.timestamp - a.timestamp));
-                } else {
-                    grid.innerHTML = "<p style='text-align:center; padding:20px; color:#666;'>No posts found.</p>";
-                }
-            }, (error) => {
-                grid.innerHTML = "<p style='text-align:center; color:red; padding:20px;'>Permission Denied.</p>";
+                    if(userLat) entries.sort((a, b) => (a.distance || 999) - (b.distance || 999));
+                    else entries.sort((a, b) => b.timestamp - a.timestamp);
+                    render(entries);
+                } else { grid.innerHTML = "<p style='text-align:center; padding:20px;'>No posts found.</p>"; }
             });
         }
 
@@ -148,24 +175,22 @@
             grid.innerHTML = data.filter(i => (role === 'all' || i.applicantType === role) && (cat === 'all' || i.mainCategory === cat))
             .map(i => {
                 const title = i.mainCategory === 'other' ? (i.otherWorkName || 'Other') : (i.mainCategory || 'Job');
-                const address = i.workAddress || 'No Address';
-                // 500 Error Fix: Map link logic
-                const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+                const addr = i.workAddress || 'No Address';
+                const distBadge = i.distance ? `<span class="dist-tag">${i.distance} KM</span>` : '';
+                const mapLink = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(addr);
 
                 return `
                 <div class="card ${i.applicantType || 'worker'}">
                     <div class="card-head">
                         <img src="${i.userPhoto || 'https://via.placeholder.com/50'}" class="user-photo">
                         <div style="flex:1">
-                            <h3 style="text-transform: capitalize; font-size:15px;">${title}</h3>
+                            <h3 style="text-transform: capitalize; font-size:15px;">${title} ${distBadge}</h3>
                             <span class="badge ${i.applicantType === 'owner' ? 'badge-owner' : 'badge-worker'}">${i.applicantType || 'worker'}</span>
                         </div>
-                        <div class="icon-box">${getIcon(i.mainCategory)}</div>
                     </div>
-                    <div style="font-size:13px; color:#475569;">📍 ${address}<br>👥 Workers: ${i.workersCount || 0} | <b>₹${i.dailyRate || 0}</b></div>
+                    <div style="font-size:13px; color:#475569; margin-top:5px;">📍 ${addr}<br>👥 Workers: ${i.workersCount || 0} | <b>₹${i.dailyRate || 0}</b></div>
                     <div class="actions">
                         <a href="tel:${i.userPhone || ''}" class="btn btn-call">Call</a>
-                        <a href="sms:${i.userPhone || ''}" class="btn btn-msg">SMS</a>
                         <a href="${mapLink}" target="_blank" class="btn btn-map">Map</a>
                     </div>
                 </div>`;
@@ -173,20 +198,11 @@
         }
 
         function getIcon(cat) { const icons = { plumber:'🚿', mistry:'👷', electrician:'⚡', driver:'🚗', helper:'🤝', painter:'🎨', other:'💼' }; return icons[cat] || '🛠️'; }
-
-        document.querySelectorAll('.tab-btn').forEach(b => { 
-            b.onclick = () => { 
-                b.parentElement.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active')); 
-                b.classList.add('active'); fetchData(); 
-            }; 
-        });
-
+        document.querySelectorAll('.tab-btn').forEach(b => { b.onclick = () => { b.parentElement.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); fetchData(); }; });
         firebase.auth().onAuthStateChanged(user => { 
-            if(user) {
-                const savedPhoto = localStorage.getItem('userPhoto');
-                if(savedPhoto) profileBtn.innerHTML = `<img src="${savedPhoto}">`;
-                fetchData(); 
-            } else { location.href = 'index.html'; } 
+            const savedPhoto = localStorage.getItem('userPhoto');
+            if(savedPhoto) profileBtn.innerHTML = `<img src="${savedPhoto}">`;
+            fetchData(); 
         });
     </script>
 </body>
