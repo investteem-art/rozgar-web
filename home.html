@@ -10,52 +10,41 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1813290992131734" crossorigin="anonymous"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #f4f7f6; padding-top: 70px; }
+        body { background: #f4f7f6; padding-top: 70px; padding-bottom: 20px; }
 
-        /* Top Navigation */
         .top-nav { 
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
             padding: 12px 15px; position: fixed; top: 0; width: 100%; z-index: 1000; 
-            display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%;
+            display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         .nav-left, .nav-right { display: flex; align-items: center; gap: 12px; color: white; }
-        
-        /* Profile Photo / Icon */
-        .profile-btn { 
-            width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,0.3); 
-            border: 2px solid white; color: white; cursor: pointer; display: flex; 
-            align-items: center; justify-content: center; overflow: hidden; font-size: 20px;
-        }
+        .profile-btn { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,0.3); border: 2px solid white; cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .profile-btn img { width: 100%; height: 100%; object-fit: cover; }
-        
         .brand-name { font-weight: bold; font-size: 18px; }
-        .nav-icon { font-size: 22px; cursor: pointer; color: white; text-decoration: none; }
 
-        /* Filters */
         .filters { background: white; padding: 15px; margin: 10px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .tab-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
         .tab-btn { padding: 10px 20px; border: 1px solid #e2e8f0; background: white; border-radius: 25px; cursor: pointer; font-weight: 600; font-size: 14px; white-space: nowrap; }
         .tab-btn.active { background: #4facfe; color: white; border-color: #4facfe; }
 
-        /* Ads */
-        #interstitialAd { display: none; margin: 10px; text-align: center; }
-
-        /* Cards */
         .grid { padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; }
         .card { background: white; border-radius: 20px; padding: 15px; border-left: 6px solid #10b981; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .card.owner { border-left-color: #f59e0b; }
+        .card-head { display: flex; gap: 12px; margin-bottom: 10px; align-items: center; }
+        .user-photo { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #eee; }
+        .icon-box { width: 40px; height: 40px; background: #f0fdfa; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
         
-        .card-head { display: flex; gap: 12px; margin-bottom: 10px; }
-        .icon-box { width: 45px; height: 45px; background: #f0fdfa; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
         .badge { font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 5px; text-transform: uppercase; }
         .badge-worker { background: #d1fae5; color: #065f46; }
         .badge-owner { background: #fef3c7; color: #92400e; }
 
         .actions { display: flex; gap: 8px; margin-top: 15px; }
-        .btn { flex: 1; padding: 10px; border-radius: 10px; color: white; font-weight: bold; text-align: center; text-decoration: none; font-size: 13px; }
+        .btn { flex: 1; padding: 10px; border-radius: 10px; color: white; font-weight: bold; text-align: center; text-decoration: none; font-size: 12px; }
         .btn-call { background: #10b981; }
         .btn-msg { background: #3b82f6; }
         .btn-map { background: #f59e0b; }
+
+        .floating-btn { position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; background: linear-gradient(135deg, #ff416c, #ff4b2b); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-size: 40px; font-weight: bold; box-shadow: 0 10px 20px rgba(255, 75, 43, 0.4); z-index: 2000; }
     </style>
 </head>
 <body>
@@ -64,19 +53,13 @@
         <div class="nav-left">
             <div class="profile-btn" id="profileIcon">👤</div>
             <span class="brand-name">RozgarSathi</span>
-            <a href="find.html" class="nav-icon">🔍</a>
         </div>
         <div class="nav-right">
-            <a href="line.html" class="nav-icon">☰</a>
+            <a href="line.html" style="color:white; text-decoration:none; font-size:24px;">☰</a>
         </div>
     </div>
 
     <input type="file" id="photoInput" accept="image/*" style="display: none;">
-
-    <div id="interstitialAd">
-        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1813290992131734" data-ad-slot="7709399088" data-ad-format="auto" data-full-width-responsive="true"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
 
     <div class="filters">
         <div class="tab-row" id="roleTabs">
@@ -98,6 +81,8 @@
 
     <div class="grid" id="workersGrid"></div>
 
+    <a href="post.html" class="floating-btn">+</a>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDQaAXGwPClpui0jxUrIPb5qok-pCAG--4",
@@ -109,115 +94,62 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
-        let allEntries = [];
-        let activeRole = 'all';
-        let activeCat = 'all';
-
-        // --- Profile Icon Logic ---
         const profileBtn = document.getElementById('profileIcon');
         const photoInput = document.getElementById('photoInput');
-        let pressTimer;
+        let pressTimer, isLongPress = false;
 
-        // Click to go to profile
-        profileBtn.onclick = () => { location.href = 'profile.html'; };
-
-        // Long Press to Change Photo
-        profileBtn.onmousedown = startPress;
-        profileBtn.ontouchstart = startPress;
-        profileBtn.onmouseup = cancelPress;
-        profileBtn.ontouchend = cancelPress;
-
-        function startPress() { pressTimer = setTimeout(() => photoInput.click(), 800); }
-        function cancelPress() { clearTimeout(pressTimer); }
+        profileBtn.addEventListener('mousedown', () => { isLongPress = false; pressTimer = setTimeout(() => { isLongPress = true; photoInput.click(); }, 800); });
+        profileBtn.addEventListener('touchstart', () => { isLongPress = false; pressTimer = setTimeout(() => { isLongPress = true; photoInput.click(); }, 800); });
+        profileBtn.addEventListener('mouseup', () => { clearTimeout(pressTimer); if(!isLongPress) location.href = 'profile.html'; });
+        profileBtn.addEventListener('touchend', () => { clearTimeout(pressTimer); if(!isLongPress) location.href = 'profile.html'; });
 
         photoInput.onchange = (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (event) => {
-                    profileBtn.innerHTML = `<img src="${event.target.result}">`;
-                    localStorage.setItem('userPhoto', event.target.result);
-                };
+                reader.onload = (ev) => { profileBtn.innerHTML = `<img src="${ev.target.result}">`; localStorage.setItem('userPhoto', ev.target.result); };
                 reader.readAsDataURL(file);
             }
         };
 
-        // Load saved photo
-        window.onload = () => {
-            const savedPhoto = localStorage.getItem('userPhoto');
-            if(savedPhoto) profileBtn.innerHTML = `<img src="${savedPhoto}">`;
-        };
-
-        // --- Ad Trigger ---
-        function triggerAd() {
-            const adDiv = document.getElementById('interstitialAd');
-            adDiv.style.display = 'block';
-            setTimeout(() => { adDiv.style.display = 'none'; }, 3000);
-        }
-
-        // --- Data Logic ---
         function fetchData() {
             db.ref('jobApplications').on('value', (snap) => {
-                allEntries = [];
-                snap.forEach(child => { allEntries.push({ id: child.key, ...child.val() }); });
-                allEntries.sort((a, b) => b.timestamp - a.timestamp);
-                render();
+                let entries = [];
+                snap.forEach(child => { entries.push({ id: child.key, ...child.val() }); });
+                render(entries.sort((a, b) => b.timestamp - a.timestamp));
             });
         }
 
-        function render() {
+        function render(data) {
             const grid = document.getElementById('workersGrid');
-            const filtered = allEntries.filter(item => {
-                // FIXED: 'all' role shows both owner/worker, 'all' cat shows all categories
-                const roleMatch = (activeRole === 'all' || item.applicantType === activeRole);
-                const catMatch = (activeCat === 'all' || item.mainCategory === activeCat);
-                return roleMatch && catMatch;
-            });
-
-            grid.innerHTML = filtered.map(item => `
-                <div class="card ${item.applicantType}">
+            const role = document.querySelector('#roleTabs .active').dataset.role;
+            const cat = document.querySelector('#catTabs .active').dataset.cat;
+            
+            grid.innerHTML = data.filter(i => (role === 'all' || i.applicantType === role) && (cat === 'all' || i.mainCategory === cat))
+            .map(i => `
+                <div class="card ${i.applicantType}">
                     <div class="card-head">
-                        <div class="icon-box">${getIcon(item.mainCategory)}</div>
-                        <div>
-                            <h3>${item.mainCategory === 'other' ? item.otherWorkName : item.mainCategory}</h3>
-                            <span class="badge ${item.applicantType === 'owner' ? 'badge-owner' : 'badge-worker'}">
-                                ${item.applicantType}
-                            </span>
+                        <img src="${i.userPhoto || 'https://via.placeholder.com/50'}" class="user-photo">
+                        <div style="flex:1">
+                            <h3 style="text-transform: capitalize; font-size:15px;">${i.mainCategory === 'other' ? i.otherWorkName : i.mainCategory}</h3>
+                            <span class="badge ${i.applicantType === 'owner' ? 'badge-owner' : 'badge-worker'}">${i.applicantType}</span>
                         </div>
+                        <div class="icon-box">${getIcon(i.mainCategory)}</div>
                     </div>
-                    <div style="font-size:13px; color:#475569;">
-                        📍 ${item.workAddress}<br>
-                        👥 Workers: ${item.workersCount} | <b style="color:#10b981;">₹${item.dailyRate}</b>
-                    </div>
+                    <div style="font-size:13px; color:#475569;">📍 ${i.workAddress}<br>👥 Workers: ${i.workersCount} | <b>₹${i.dailyRate}</b></div>
                     <div class="actions">
-                        <a href="tel:${item.userPhone}" class="btn btn-call">Call</a>
-                        <a href="sms:${item.userPhone}" class="btn btn-msg">SMS</a>
-                        <button class="btn btn-map" onclick="window.open('http://googleusercontent.com/maps.google.com/5{encodeURIComponent(item.workAddress)}')">Map</button>
+                        <a href="tel:${i.userPhone}" class="btn btn-call">Call</a>
+                        <a href="sms:${i.userPhone}" class="btn btn-msg">SMS</a>
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(i.workAddress)}" target="_blank" class="btn btn-map">Map</a>
                     </div>
-                </div>
-            `).join('');
+                </div>`).join('');
         }
 
-        function getIcon(cat) {
-            const icons = { plumber:'🚿', mistry:'👷', electrician:'⚡', driver:'🚗', helper:'🤝', painter:'🎨', other:'💼' };
-            return icons[cat] || '🛠️';
-        }
+        function getIcon(cat) { const icons = { plumber:'🚿', mistry:'👷', electrician:'⚡', driver:'🚗', helper:'🤝', painter:'🎨', other:'💼' }; return icons[cat] || '🛠️'; }
 
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.onclick = () => {
-                const parent = btn.parentElement.id;
-                document.querySelectorAll(`#${parent} .tab-btn`).forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                if(parent === 'roleTabs') activeRole = btn.dataset.role;
-                else activeCat = btn.dataset.cat;
-                
-                triggerAd();
-                render();
-            };
-        });
+        document.querySelectorAll('.tab-btn').forEach(b => { b.onclick = () => { b.parentElement.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); fetchData(); }; });
 
-        firebase.auth().onAuthStateChanged(user => { if(user) fetchData(); else location.href='index.html'; });
+        window.onload = () => { if(localStorage.getItem('userPhoto')) profileBtn.innerHTML = `<img src="${localStorage.getItem('userPhoto')}">`; fetchData(); };
     </script>
 </body>
 </html>
