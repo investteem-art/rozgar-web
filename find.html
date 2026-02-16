@@ -3,49 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find Work - RozgarSathi</title>
+    <title>RozgarSathi - Search</title>
+    <link rel="manifest" href="/manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+    </script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #f4f7f6; padding-top: 70px; }
-        .top-nav { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 15px; position: fixed; top: 0; width: 100%; z-index: 1000; color: white; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .back-btn { text-decoration: none; color: white; font-size: 24px; }
+        body { background: #f0f4f8; padding-top: 70px; }
+
+        .top-nav { 
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+            padding: 15px; position: fixed; top: 0; width: 100%; z-index: 1000; 
+            display: flex; align-items: center; color: white; gap: 15px;
+        }
+        .back-btn { font-size: 24px; cursor: pointer; text-decoration: none; color: white; }
+
         .container { padding: 15px; max-width: 500px; margin: 0 auto; }
-        .search-card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        .search-card { 
+            background: white; padding: 20px; border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 20px;
+        }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #475569; }
-        select, input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 15px; outline: none; background: #f8fafc; }
-        .confirm-btn { width: 100%; padding: 15px; background: #10b981; color: white; border: none; border-radius: 15px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.3s; }
-        .confirm-btn:hover { background: #059669; }
-        .result-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; border-left: 5px solid #4facfe; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .actions { display: flex; gap: 10px; margin-top: 10px; }
-        .btn { flex: 1; padding: 10px; border-radius: 8px; text-align: center; text-decoration: none; color: white; font-weight: bold; font-size: 13px; }
-        .btn-call { background: #10b981; }
-        .btn-map { background: #f59e0b; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #475569; font-size: 14px; }
+        .form-group select, .form-group input { 
+            width: 100%; padding: 12px; border: 1px solid #e2e8f0; 
+            border-radius: 12px; font-size: 15px; outline: none; background: #f8fafc;
+        }
+        .row { display: flex; gap: 10px; }
+        .row .form-group { flex: 1; }
+
+        .find-btn { 
+            width: 100%; padding: 15px; border: none; border-radius: 15px; 
+            background: #10b981; color: white; font-weight: 700; font-size: 16px; 
+            cursor: pointer; transition: 0.3s;
+        }
+        .find-btn:hover { background: #059669; }
+
+        .result-card { 
+            background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; 
+            border-left: 5px solid #4facfe; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .result-card.owner { border-left-color: #f59e0b; }
+        .card-price { color: #10b981; font-weight: 800; }
+        .distance-tag { font-size: 11px; background: #f1f5f9; padding: 2px 6px; border-radius: 5px; color: #64748b; float: right; }
+        
+        .no-data { text-align: center; padding: 40px; color: #94a3b8; }
     </style>
 </head>
 <body>
 
     <div class="top-nav">
         <a href="home.html" class="back-btn">←</a>
-        <h3 style="font-size: 18px;">Search Jobs / Workers</h3>
+        <h3 style="flex-grow: 1;">Find Work / Worker</h3>
     </div>
 
     <div class="container">
         <div class="search-card">
             <div class="form-group">
-                <label>👤 You need?</label>
-                <select id="findRole">
+                <label>I am looking for</label>
+                <select id="role">
                     <option value="all">Everyone</option>
                     <option value="owner">Owner / Contractor</option>
-                    <option value="worker">Worker / Labor</option>
+                    <option value="worker">Worker</option>
                 </select>
             </div>
+
             <div class="form-group">
-                <label>🎯 Category</label>
-                <select id="findCat">
+                <label>Category</label>
+                <select id="category">
                     <option value="all">All Categories</option>
                     <option value="plumber">Plumber</option>
                     <option value="mistry">Mistry</option>
@@ -53,16 +85,32 @@
                     <option value="driver">Driver</option>
                     <option value="helper">Helper</option>
                     <option value="painter">Painter</option>
+                    <option value="other">Other</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label>📍 Distance (Max km)</label>
-                <input type="number" id="findRange" placeholder="e.g. 10" value="50">
+
+            <div class="row">
+                <div class="form-group">
+                    <label>Min Price (₹)</label>
+                    <input type="number" id="minPrice" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Max Price (₹)</label>
+                    <input type="number" id="maxPrice" placeholder="5000">
+                </div>
             </div>
-            <button class="confirm-btn" onclick="startSearch()">🔍 Confirm & Search</button>
+
+            <div class="form-group">
+                <label>Within Distance (km)</label>
+                <input type="number" id="range" placeholder="50">
+            </div>
+
+            <button class="find-btn" onclick="searchNow()">🔍 Confirm & Search</button>
         </div>
 
-        <div id="searchResults"></div>
+        <div id="results">
+            <div class="no-data">Fill the filters to start searching</div>
+        </div>
     </div>
 
     <script>
@@ -71,46 +119,69 @@
             authDomain: "rozgar-sathi-1ae88.firebaseapp.com",
             databaseURL: "https://rozgar-sathi-1ae88-default-rtdb.firebaseio.com",
             projectId: "rozgar-sathi-1ae88",
+            storageBucket: "rozgar-sathi-1ae88.firebasestorage.app",
+            messagingSenderId: "78331447702",
             appId: "1:78331447702:web:5d932141d7a369091635b7"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function startSearch() {
-            const role = document.getElementById('findRole').value;
-            const cat = document.getElementById('findCat').value;
-            const resultsDiv = document.getElementById('searchResults');
-            
+        let myLat, myLong;
+
+        navigator.geolocation.getCurrentPosition(pos => {
+            myLat = pos.coords.latitude;
+            myLong = pos.coords.longitude;
+        });
+
+        function searchNow() {
+            const role = document.getElementById('role').value;
+            const cat = document.getElementById('category').value;
+            const min = parseInt(document.getElementById('minPrice').value) || 0;
+            const max = parseInt(document.getElementById('maxPrice').value) || 99999;
+            const range = parseInt(document.getElementById('range').value) || 1000;
+            const resultsDiv = document.getElementById('results');
+
             resultsDiv.innerHTML = "<p style='text-align:center;'>Searching...</p>";
 
-            db.ref('jobApplications').once('value', snap => {
+            db.ref('jobApplications').once('value', snapshot => {
                 let html = '';
-                if (snap.exists()) {
-                    snap.forEach(child => {
-                        const data = child.val();
-                        // Filter Logic
-                        const roleMatch = (role === 'all' || data.applicantType === role);
-                        const catMatch = (cat === 'all' || data.mainCategory === cat);
+                let count = 0;
 
-                        if (roleMatch && catMatch) {
-                            const title = data.mainCategory === 'other' ? data.otherWorkName : data.mainCategory;
-                            html += `
-                            <div class="result-card" style="border-left-color: ${data.applicantType === 'owner' ? '#f59e0b' : '#10b981'}">
-                                <h4 style="text-transform: capitalize;">${title} (${data.applicantType})</h4>
-                                <p style="font-size: 13px; color: #666; margin: 5px 0;">📍 ${data.workAddress || 'No Address'}</p>
-                                <p style="font-size: 14px; font-weight: bold; color: #10b981;">₹${data.dailyRate || 0} / Day</p>
-                                <div class="actions">
-                                    <a href="tel:${data.userPhone}" class="btn btn-call">Call</a>
-                                    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.workAddress)}" target="_blank" class="btn btn-map">Map</a>
+                snapshot.forEach(child => {
+                    const data = child.val();
+                    
+                    const roleMatch = (role === 'all' || data.applicantType === role);
+                    const catMatch = (cat === 'all' || data.mainCategory === cat);
+                    const priceMatch = (data.dailyRate >= min && data.dailyRate <= max);
+                    
+                    if (roleMatch && catMatch && priceMatch) {
+                        count++;
+                        html += `
+                            <div class="result-card ${data.applicantType}">
+                                <div class="distance-tag">₹${data.dailyRate}/day</div>
+                                <h4 style="text-transform:capitalize;">${data.mainCategory}</h4>
+                                <p style="font-size:13px; color:#64748b; margin:5px 0;">📍 ${data.workAddress}</p>
+                                <div style="display:flex; gap:10px; margin-top:10px;">
+                                    <a href="tel:${data.userPhone}" style="flex:1; background:#10b981; color:white; text-align:center; padding:8px; border-radius:8px; text-decoration:none; font-size:12px; font-weight:bold;">Call</a>
+                                    <button onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.workAddress)}')" style="flex:1; background:#f59e0b; color:white; border:none; padding:8px; border-radius:8px; font-size:12px; font-weight:bold;">Map</button>
                                 </div>
-                            </div>`;
-                        }
-                    });
-                    resultsDiv.innerHTML = html || "<p style='text-align:center;'>No match found.</p>";
-                } else {
-                    resultsDiv.innerHTML = "<p style='text-align:center;'>No data available.</p>";
-                }
+                            </div>
+                        `;
+                    }
+                });
+
+                resultsDiv.innerHTML = count > 0 ? html : '<div class="no-data">No results found</div>';
             });
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; 
+            const dLat = (lat2-lat1) * Math.PI / 180;
+            const dLon = (lon2-lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
         }
     </script>
 </body>

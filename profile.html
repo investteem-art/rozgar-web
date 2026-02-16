@@ -1,64 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Coming Soon</title>
-  <style>
-    html,body {
-      height:100%;
-      margin:0;padding:0;
-      background: #08162e;
-      overflow: hidden;
-    }
-    #bouncer {
-      position:fixed;
-      left:20vw; top:25vh;
-      width:170px; height:60px;
-      background:linear-gradient(90deg,#36e56a,#6dd5fa);
-      color:#212;text-align:center;
-      font-weight:900;
-      font-size:1.8rem;
-      border-radius:35px;
-      box-shadow:0 5px 40px #1ff5da60,0 1px 6px #1e2f66;
-      display:flex; align-items:center; justify-content:center;
-      z-index:100;
-      transition:background 0.2s;
-      border: 3px solid #ffe066;
-      animation:pulse 2.5s infinite;
-      user-select:none;
-    }
-    @keyframes pulse {
-      0%   { box-shadow:0 0 18px #f7ffaf66;}
-      60%  { box-shadow:0 0 60px #36e57750;}
-      100% { box-shadow:0 0 18px #f7ffaf66;}
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RozgarSathi - My Profile</title>
+    <link rel="manifest" href="/manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #f0f4f8; min-height: 100vh; }
+
+        .header { 
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+            height: 180px; border-radius: 0 0 40px 40px; position: relative;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .back-nav { position: absolute; top: 20px; left: 20px; color: white; text-decoration: none; font-size: 24px; }
+        .not-nav { position: absolute; top: 20px; right: 20px; color: white; text-decoration: none; font-size: 24px; }
+
+        .profile-card { 
+            background: white; width: 90%; max-width: 400px; margin: -60px auto 20px; 
+            border-radius: 30px; padding: 25px; text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        
+        .user-img { 
+            width: 110px; height: 110px; border-radius: 50%; border: 4px solid white;
+            object-fit: cover; background: #e2e8f0; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .name-input { 
+            border: none; background: transparent; font-size: 22px; font-weight: 800; 
+            color: #1e293b; text-align: center; margin-top: 15px; width: 100%; outline: none;
+        }
+        
+        .uid-label { font-size: 11px; color: #94a3b8; margin-top: 5px; background: #f8fafc; padding: 5px 10px; border-radius: 10px; }
+
+        .menu-list { margin-top: 30px; text-align: left; }
+        .menu-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 15px; background: #f8fafc; border-radius: 15px; margin-bottom: 12px;
+            cursor: pointer;
+        }
+        .menu-label { font-weight: 600; color: #475569; display: flex; align-items: center; gap: 10px; }
+
+        .switch { position: relative; width: 46px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #cbd5e1; transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background: #10b981; }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        .logout-btn { 
+            width: 100%; padding: 15px; background: #fff1f2; color: #e11d48; border: none;
+            border-radius: 18px; font-weight: 700; cursor: pointer; margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-  <div id="bouncer">Coming Soon...</div>
-<script>
-let box = document.getElementById('bouncer');
-let pos = {x:window.innerWidth/2, y:window.innerHeight/3};
-let dx = 2.8, dy = 2.0;
-function animate() {
-  let ww=window.innerWidth, wh=window.innerHeight;
-  let w = box.offsetWidth, h = box.offsetHeight;
-  pos.x += dx;
-  pos.y += dy;
-  if(pos.x < 0){ pos.x=0; dx=-dx; }
-  if(pos.x + w > ww){ pos.x=ww-w; dx=-dx; }
-  if(pos.y < 0){ pos.y=0; dy=-dy; }
-  if(pos.y + h > wh){ pos.y=wh-h; dy=-dy; }
-  box.style.left = pos.x+'px';
-  box.style.top = pos.y+'px';
-  requestAnimationFrame(animate);
-}
-window.addEventListener('resize',()=>{
-  pos.x = Math.min(pos.x, window.innerWidth-box.offsetWidth);
-  pos.y = Math.min(pos.y, window.innerHeight-box.offsetHeight);
-});
-animate();
-</script>
+
+    <div class="header">
+        <a href="home.html" class="back-nav">🏠</a>
+        <h2 style="color: white; font-weight: 700;">Profile</h2>
+        <a href="line.html" class="not-nav">📝</a> 
+    </div>
+
+    <div class="profile-card">
+        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="pfp" class="user-img">
+        
+        <input type="text" id="userName" class="name-input" placeholder="Enter Name">
+        <div class="uid-label" id="userUid">UID: Loading...</div>
+
+        <div class="menu-list">
+            <div class="menu-item" style="cursor: default;">
+                <div class="menu-label">🛡️ Hide My Profile</div>
+                <label class="switch">
+                    <input type="checkbox" id="vToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="menu-item" onclick="location.href='mypost.html'">
+                <div class="menu-label">📤 My Posting</div>
+                <span style="color: #94a3b8;">→</span>
+            </div>
+        </div>
+
+        <button class="logout-btn" onclick="userLogout()">Logout</button>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQaAXGwPClpui0jxUrIPb5qok-pCAG--4",
+            authDomain: "rozgar-sathi-1ae88.firebaseapp.com",
+            databaseURL: "https://rozgar-sathi-1ae88-default-rtdb.firebaseio.com",
+            projectId: "rozgar-sathi-1ae88",
+            storageBucket: "rozgar-sathi-1ae88.firebasestorage.app",
+            messagingSenderId: "78331447702",
+            appId: "1:78331447702:web:5d932141d7a369091635b7"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('userUid').innerText = "UID: " + user.uid;
+                const savedPhoto = localStorage.getItem('userPhoto');
+                if(savedPhoto) document.getElementById('pfp').src = savedPhoto;
+
+                db.ref('users/' + user.uid).once('value', (snap) => {
+                    const data = snap.val();
+                    if(data) {
+                        if(data.name) document.getElementById('userName').value = data.name;
+                        if(data.visibility === 'hidden') document.getElementById('vToggle').checked = true;
+                    }
+                });
+            } else { location.href = 'index.html'; }
+        });
+
+        document.getElementById('userName').addEventListener('change', function() {
+            db.ref('users/' + auth.currentUser.uid).update({ name: this.value });
+        });
+
+        document.getElementById('vToggle').onchange = function() {
+            db.ref('users/' + auth.currentUser.uid).update({ visibility: this.checked ? 'hidden' : 'visible' });
+        };
+
+        function userLogout() {
+            auth.signOut().then(() => { localStorage.clear(); location.href = 'index.html'; });
+        }
+    </script>
 </body>
 </html>
